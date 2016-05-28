@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -58,12 +58,12 @@ void GroupMenager::Save(){
         save->setEnabled(false);
         ComboChsnged(0);
     }else{
-        QMessageBox::information(this,"Error","таблица пуста!");
+        QMessageBox::information(this,"Error","Таблица пуста!");
     }
 }
 void GroupMenager::del(){
     QMessageBox::StandardButton temp;
-    temp = QMessageBox::question(this, "удаление","удалить группу "+thisGroup->getName()+" ?",
+    temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
                                   QMessageBox::Yes|QMessageBox::No);
     if(temp==QMessageBox::Yes){
         if(bd->deleteGroup(thisGroup->getName())){
@@ -85,8 +85,8 @@ void GroupMenager::add_(){
     QString temp;
     int temp3;
     do{
-        temp=QInputDialog::getText(this,"Новвая группа","Введите номер новой группы");
-        temp3=QInputDialog::getInt(this,"Новвая группа","Введите количество студентов",0,0,500);
+        temp=QInputDialog::getText(this,"Новая группа","Введите номер новой группы");
+        temp3=QInputDialog::getInt(this,"Новая группа","Введите количество студентов",0,0,500);
         if(temp=="") return;
     }while(bd->find(temp));
     tableGroub->setRowCount(temp3);
@@ -96,7 +96,7 @@ void GroupMenager::add_(){
         tableGroub->setCellWidget(j,0,new QLineEdit("обучающийся "+QString::number(j)));
     }
     bd->createGroup(QStringList(),temp);
-    QMessageBox::information(this,"Message","группа "+temp+" созданна");
+    QMessageBox::information(this,"Message","группа "+temp+" создана");
     ComboWrite(cb);
     cb->setCurrentText(temp);
     save->setEnabled(true);

@@ -9,26 +9,26 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef SOURCETABLE_H
-#define SOURCETABLE_H
-
-#include "core.h"
+#ifndef HELP_H
+#define HELP_H
+#include <QDialog>
+#include <QLabel>
+#include <QFile>
+#include <QTextStream>
 #include <QHBoxLayout>
-class SourceTable : public QWidget
+#include <QTextBrowser>
+class Help: public QDialog
 {
     Q_OBJECT
-private:
-    QWidget *Source;
-    QHBoxLayout *lb;
+private :
+
+    QTextBrowser *aboutLogo;
+private slots:
+    void anchers(QUrl);
 public:
-    explicit SourceTable(QWidget *parent = 0);
-    void setSource(QWidget*);
-    bool isEmpty()const;
-    QWidget* getSource()const;
-    ~SourceTable();
-signals:
-    void SourceChanged(QWidget*);
-public slots:
+
+    Help(QWidget *ptr=NULL);
 };
 
-#endif // SOURCETABLE_H
+
+#endif // HELP_H

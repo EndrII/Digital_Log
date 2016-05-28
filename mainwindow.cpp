@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -46,9 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
     bd->open(Setings::read());
 }
 void MainWindow::createGroupMenu(){
-    grs=new QAction("менеджер групп",this);
+    grs=new QAction("Менеджер групп",this);
     //temp1->setShortcut(QKeySequence::Bold);
-    grs->setStatusTip("упровление группами");
+    grs->setStatusTip("Управление группами");
     this->menuBar()->addAction(grs);
     connect(grs,SIGNAL(triggered(bool)),this,SLOT(GRM(bool)));
 }
@@ -65,7 +65,7 @@ void MainWindow::StateBDChanged(StateDataBase stat){
         crea->setEnabled(true);
         break;
     case Arhive:
-        state->setText("<center>База данных являеться архивом!<center>");
+        state->setText("<center>База данных является архивом!<center>");
         state->setStyleSheet("background-color : #F4A460;");
         arh->setEnabled(false);
         sv->setEnabled(false);
@@ -119,10 +119,21 @@ void MainWindow::CreateLogMenu(){
 
     mset=new QAction("Настройки",this);
     //temp1->setShortcut(QKeySequence::);
-    mset->setStatusTip("Настрйки базы данных");
+    mset->setStatusTip("Настройки базы данных");
     this->menuBar()->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
+    mset=new QAction("О DigitalLog",this);
+    //temp1->setShortcut(QKeySequence::);
+    //mset->setStatusTip("Настройки базы данных");
+    this->menuBar()->addAction(mset);
+    connect(mset,SIGNAL(triggered(bool)),this,SLOT(about(bool)));
+
+    mset=new QAction("Справка",this);
+    mset->setShortcut(QKeySequence::HelpContents);
+    //mset->setStatusTip("Настройки базы данных");
+    this->menuBar()->addAction(mset);
+    connect(mset,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
 
 }
 void MainWindow::closeArhiv(bool){
@@ -136,7 +147,7 @@ void MainWindow::setings(bool){
         st=new Setings(bd,this);
         st->show();
     }else{
-        QMessageBox::information(this,"безопасность","введен не верный пароль!");
+        QMessageBox::information(this,"Безопасность","Введен не верный пароль!");
     }
 }
 void MainWindow::GRM(bool){
@@ -144,7 +155,7 @@ void MainWindow::GRM(bool){
         grm=new GroupMenager(bd,this);
         grm->show();
     }else{
-        QMessageBox::information(this,"безопасность","введен не верный пароль!");
+        QMessageBox::information(this,"Безопасность","Введен не верный пароль!");
     }
 }
 void MainWindow::CreateInterface(){
@@ -161,7 +172,7 @@ void MainWindow::toArhiv(bool){
 void MainWindow::AchiveOk(QString str){
     if(tempPatch=="NoArhive")
         tempPatch=bd->getPatch();
-    bd->open(str);
+    if(str!="")bd->open(str);
 }
 void MainWindow::arhive(bool){
     ReadArchiv *ar=new ReadArchiv(bd->getArhivePatch(),this);
@@ -182,7 +193,7 @@ void MainWindow::createFileMenu(){
     temp->addAction(temp1);
     sv=new QAction("Сохранить",this);
     sv->setShortcut(QKeySequence::Save);
-    sv->setStatusTip("сохранит всё базу данных");
+    sv->setStatusTip("Сохранит всё базу данных");
     connect(sv,SIGNAL(triggered(bool)),this,SLOT(Save(bool)));
     temp->addAction(sv);
     star=new QAction("Запустить",this);
@@ -205,6 +216,14 @@ void MainWindow::createFileMenu(){
 void MainWindow::Save(bool){
     bd->saveAll();
 }
+void MainWindow::about(bool){
+    About *a=new About(this);
+    a->show();
+}
+void MainWindow::help(bool){
+    Help *a=new Help(this);
+    a->show();
+}
 void MainWindow::start(bool){
     bd->startTime();
 }
@@ -215,7 +234,7 @@ void MainWindow::Error(int i, QString str){
     switch(i){
     case 0:QMessageBox::information(this,"Error",str); break;
     case 1:QMessageBox::information(this,"Error","не возможно записать файл"+str); break;
-    case 2:QMessageBox::information(this,"Error","группа не найденна"+str); break;
+    case 2:QMessageBox::information(this,"Error","группа не найдена"+str); break;
     case 3:QMessageBox::information(this,"Error","ошибка открытия группы"+str); break;
     case 4:QMessageBox::information(this,"Error","база данных уже создана"+str); break;
     default:break;
@@ -232,7 +251,7 @@ void MainWindow::OpenDB(bool){
     bd->open(QFileDialog::getOpenFileName(this));
 }
 void MainWindow::DataBaseCreated(QString str){
-    QMessageBox::information(this,"BD","база данных создана в "+str);
+    QMessageBox::information(this,"BD","База данных создана в "+str);
 }
 void MainWindow::closeEvent(QCloseEvent *)
 {

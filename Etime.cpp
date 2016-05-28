@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -134,8 +134,8 @@ void ETime::attach(QDate *d, bool *b){
     date=d;
     auto_=b;
 }
-QDate& ETime::operator [](const unsigned int& index){
-        return SourceDate[index];
+QDate& ETime::operator [](const unsigned int& index){    
+    return SourceDate[index];
 }
 bool ETime::operator !=(const ETime&B){
     return !((*this)==B);

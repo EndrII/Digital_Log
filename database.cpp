@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -273,7 +273,7 @@ int DataBase::find_index(Group*gr){
 void DataBase::startTime(){
     if(this->isCreated()){
         if(!time->start()){
-            emit Error(0,"Данная база данных уже начала ведение отчётов");
+            emit Error(0,"Данная база данных уже начала ведение отчетов");
         }else{
             if(statusBD!=Arhive){
                 emit StateChanged(statusBD=Started);
@@ -288,7 +288,7 @@ void DataBase::startTime(){
 }
 bool DataBase::endTime(){
     if(!time->isStarted()){
-        emit Error(0,"База данных не начала отчёт времени!");
+        emit Error(0,"База данных не начала отчет времени!");
         return false;
     }
     QString temp=QDate::currentDate().toString("dd.MMMM.yyyy");
@@ -303,7 +303,7 @@ bool DataBase::endTime(){
         //if(p.first->getSavedState()==)
         this->openGroup(p.first->getName());
         if(p.second==NULL||!p.second->Write(ARhivePatch+"/"+temp+"/"+"SGR"+p.first->getName())){
-            emit Error(0,"Ошибка записи в акхив, вероятно данные группы "+p.first->getName()+" поврежденны");
+            emit Error(0,"Ошибка записи в архив, вероятно данные группы "+p.first->getName()+" повреждены");
         }
         this->deleteControlGroup(p.first);
     }

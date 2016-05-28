@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -25,6 +25,8 @@
 #include "groupmenager.h"
 #include "readarchiv.h"
 #include "setings.h"
+#include "about.h"
+#include "help.h"
 //#include <QRadioButton>
 class MainWindow : public QMainWindow
 {
@@ -51,6 +53,8 @@ private slots:
     void Error(int,QString);
     void DataBaseCreated(QString);
     void Save(bool);
+    void about(bool);
+    void help(bool);
     void setings(bool);
     void AchiveOk(QString);
     void StateBDChanged(StateDataBase stat);

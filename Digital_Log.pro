@@ -8,9 +8,15 @@ QT       += core gui
 CONFIG   += C++14
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Digital_Log
+TARGET = DigitalLog
 TEMPLATE = app
-
+VERSION = 1.0.1.0
+TEMPLATE = app
+QMAKE_TARGET_COMPANY = Yankovich Andrei
+QMAKE_TARGET_PRODUCT = DigitalLog
+QMAKE_TARGET_DESCRIPTION = Digital Log
+QMAKE_TARGET_COPYRIGHT = (c) Yankovich Andrei
+RC_ICONS =logo.ico
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -22,10 +28,11 @@ SOURCES += main.cpp\
     sourcetable.cpp \
     starastamode.cpp \
     groupmenager.cpp \
-    log.cpp \
     setings.cpp \
     datewidget.cpp \
-    readarchiv.cpp
+    readarchiv.cpp \
+    about.cpp \
+    help.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -37,10 +44,13 @@ HEADERS  += mainwindow.h \
     sourcetable.h \
     starastamode.h \
     groupmenager.h \
-    log.h \
     setings.h \
     datewidget.h \
-    readarchiv.h
+    readarchiv.h \
+    about.h \
+    help.h
 
-FORMS += \
-    form.ui
+FORMS +=
+
+RESOURCES += \
+    res.qrc

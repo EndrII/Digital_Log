@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -52,9 +52,9 @@ void StarastaMode::saveClick(){
 }
 void StarastaMode::removeClick(){
     if(bd->getPass()!=""){
-        if(bd->getPass()==QInputDialog::getText(this,"безопасность","введите пароль безопасности для входа в настройки базы данных")){
+        if(bd->getPass()==QInputDialog::getText(this,"Безопасность","Введите пароль безопасности для входа в настройки базы данных")){
             QMessageBox::StandardButton temp;
-            temp = QMessageBox::question(this, "удаление","удалить группу "+thisGroup->getName()+" ?",
+            temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
                                           QMessageBox::Yes|QMessageBox::No);
             if(temp==QMessageBox::Yes){
                 if(bd->deleteControlGroup(thisGroup))
@@ -62,11 +62,11 @@ void StarastaMode::removeClick(){
             }
 
         }else{
-            QMessageBox::information(this,"безопасность","введен не верный пароль!");
+            QMessageBox::information(this,"Безопасность","Введен не верный пароль!");
         }
     }else{
         QMessageBox::StandardButton temp;
-        temp = QMessageBox::question(this, "удаление","удалить группу "+thisGroup->getName()+" ?",
+        temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
                                       QMessageBox::Yes|QMessageBox::No);
         if(temp==QMessageBox::Yes){
             if(bd->deleteControlGroup(thisGroup))
@@ -168,7 +168,7 @@ void StarastaMode::GroupCreated(Group *){
 void StarastaMode::controlGroupCreated(GroupVoid *gr){
    // connect(gr,SIGNAL(Warning(QString)),
     GroupOpened(gr);
-    gr->setLim(QInputDialog::getInt(this,"Создание отчёта","введите лимит пропусков для группы "+gr->getName(),bd->getLastPropusk()));
+    gr->setLim(QInputDialog::getInt(this,"Создание отчета","введите лимит пропусков для группы "+gr->getName(),bd->getLastPropusk()));
 }
 void StarastaMode::Redraw(GroupVoid *gr){
     if(gr==NULL)

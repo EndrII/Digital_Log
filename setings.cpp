@@ -1,9 +1,9 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 A.N.Yankovich.
-** Contact: https://vk.com/digitalface
+** Contact: https://vk.com/id223266985
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:GPLv3$
 ** This file is distributed under the GPLv3 license.
 **
 ** $QT_END_LICENSE$
@@ -21,25 +21,25 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     this->setModal(true);
     QVBoxLayout *vbox=new QVBoxLayout(this);
     QHBoxLayout *hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel("первичный путь к базе данных"));
+    hbox->addWidget(new QLabel("Первичный путь к базе данных "));
     patch=new QLineEdit(this);
     patch->setText(bd->getPatch());
     hbox->addWidget(patch);
-    patchButton=new QPushButton("выбрать");
+    patchButton=new QPushButton("Выбрать");
     hbox->addWidget(patchButton);
     vbox->addLayout(hbox);
     hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel("путь к архиву базе данных"));
+    hbox->addWidget(new QLabel("Путь к архиву базе данных"));
     patchArhov=new QLineEdit();
     patchArhov->setText(bd->getArhivePatch());
     hbox->addWidget(patchArhov);
-    ArhivButton=new QPushButton("выбрать");
+    ArhivButton=new QPushButton("Выбрать");
     hbox->addWidget(ArhivButton);
-    autoSave=new QCheckBox("Автосохронение Базы данных",this);
+    autoSave=new QCheckBox("Автосохранение Базы данных",this);
     autoSave->setCheckState((Qt::CheckState)(Bd->AutoSave*2));
-    autoGroup=new QCheckBox("Автосохронение менеджера групп",this);
+    autoGroup=new QCheckBox("Автосохранение менеджера групп",this);
     autoGroup->setCheckState((Qt::CheckState)(Bd->getAutosaveGroup()*2));
-    autoSem=new QCheckBox("Автоматическое ведение отчётов в семестрах",this);
+    autoSem=new QCheckBox("Автоматическое ведение отчётов в семестрах (БЕТА)",this);
     autoSem->setCheckState((Qt::CheckState)(Bd->getAutoSem()*2));
     dateB1=new DateWidget(false,this);
     dateB1->setDate(Bd->Dates()[0]);
@@ -75,7 +75,7 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     hbox->addWidget(new QLabel("Конец семестра (полугодие 2)"));
     hbox->addWidget(dateE2);
     vbox->addLayout(hbox);
-    passChang=new QPushButton("изменить пароль безопасности");
+    passChang=new QPushButton("Изменить пароль безопасности");
     vbox->addWidget(passChang);
 
     hbox=new QHBoxLayout(this);
@@ -128,7 +128,7 @@ void Setings::patchButtonClick(bool){
     }
 }
 void Setings::passChanged(bool){
-    Bd->setPass(QInputDialog::getText(this,"Новый пароль","введите новый пароль или оставте строку пустой что бы отключить его"));
+    Bd->setPass(QInputDialog::getText(this,"Новый пароль","введите новый пароль или оставьте строку пустой что бы отключить его"));
 }
 void Setings::autoSemChang(int i){
     dateB1->setEnabled(i==2);
