@@ -119,7 +119,7 @@ QDataStream& operator >>(QDataStream &stream, ETime & tim){
         stream>>temp2;
         tim.SourceDate.push_back(temp2);
     }
-    tim._add();
+    //tim._add();// ошибка чтения (новая дата добавляеться ранише чем происзодит запись данных из файла)
     return stream;
 }
 QDataStream& operator <<(QDataStream &stream, ETime & tim){

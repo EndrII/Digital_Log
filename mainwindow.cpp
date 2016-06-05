@@ -123,17 +123,17 @@ void MainWindow::CreateLogMenu(){
     this->menuBar()->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
-    mset=new QAction("О DigitalLog",this);
+    temp2=new QAction("О DigitalLog",this);
     //temp1->setShortcut(QKeySequence::);
     //mset->setStatusTip("Настройки базы данных");
-    this->menuBar()->addAction(mset);
-    connect(mset,SIGNAL(triggered(bool)),this,SLOT(about(bool)));
+    this->menuBar()->addAction(temp2);
+    connect(temp2,SIGNAL(triggered(bool)),this,SLOT(about(bool)));
 
-    mset=new QAction("Справка",this);
-    mset->setShortcut(QKeySequence::HelpContents);
+    temp2=new QAction("Справка",this);
+    temp2->setShortcut(QKeySequence::HelpContents);
     //mset->setStatusTip("Настройки базы данных");
-    this->menuBar()->addAction(mset);
-    connect(mset,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
+    this->menuBar()->addAction(temp2);
+    connect(temp2,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
 
 }
 void MainWindow::closeArhiv(bool){

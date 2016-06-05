@@ -153,7 +153,8 @@ void StarastaMode::StateChanged(StateDataBase st){
 void StarastaMode::GroupChanged(Group *){
   //  Redraw(thisVoidGroup);
 }
-void StarastaMode::ControlGroupChanged(GroupVoid *){
+void StarastaMode::ControlGroupChanged(GroupVoid *gr){
+    if(thisVoidGroup==gr)
       Redraw(thisVoidGroup);
 }
 void StarastaMode::GroupOpened(GroupVoid *gr){

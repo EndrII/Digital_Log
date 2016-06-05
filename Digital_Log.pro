@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.1.0
+VERSION = 1.0.1.2
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog

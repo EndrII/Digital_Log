@@ -157,7 +157,6 @@ int GroupVoid::size()const{
 QDataStream& operator >>(QDataStream &stream,GroupVoid &gr){
     gr.clear();
     stream>>*gr.colums_TEST;
-    //Group::operator <<(stream,gr);
     stream>>*gr.rows_TEST;
     for(int i=0;i<gr.rows_TEST->size();i++){
         gr.dataStudents.push_back(new QVector<ui>);
@@ -177,10 +176,8 @@ QDataStream& operator <<(QDataStream &stream,GroupVoid &gr){
         throw EError("DataBase ByteArray Error","GroupVoid::operator <<");
     }else{
         stream<<*gr.colums;
-        //Group::operator <<(stream,gr);
         stream<<*gr.rows;
         for(int i=0;i<gr.rows->size();i++){
-            //stream<<gr.dataStudents[i];
             for(int j=0;j<gr.colums->size();j++){
                 stream<<(*gr.dataStudents[i])[j];
             }
