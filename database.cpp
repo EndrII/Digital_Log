@@ -22,6 +22,7 @@ DataBase::DataBase(const QString & patch_,QObject *ptr):
     AutoSave=true;
     datesave=new QDate[4];
     time=NULL;
+    mode=noData;
     //open(patch_);
 }
 void DataBase::PatchCorect(){
@@ -209,25 +210,48 @@ void DataBase::readAllBD(){
         emit Error(0,"не удалось прочесть следующие группы: "+tempMessage+"возможно для них не видеться журнал.");
     }
 }
-void DataBase::createDataBase(const QString &name){
-    if(name=="") return;
-    patch=name;
-    PatchCorect();
-    if(QFile(patch+HEADER_DB).exists()){
-        emit Error(4,patch);
-    }else{
-        DELETE(time);
-        for(BPair i:descript){
-            delete i.second;
-            delete i.first;
+void DataBase::createDataBase(const QString &name,const BaseMode& mod,const QString &host_name,const QString & userName,const QString & userPassword){
+    switch(mod){
+    case C_PlusMode:{
+        mode=mod;
+        if(name=="") return;
+        patch=name;
+        PatchCorect();
+        if(QFile(patch+HEADER_DB).exists()){
+            emit Error(4,patch);
+        }else{
+            DELETE(time);
+            for(BPair i:descript){
+                delete i.second;
+                delete i.first;
+            }
+            descript.clear();
+            time=new ETime();
+            time->attach(datesave,&autoSem);
+            connect(time,SIGNAL(statusChanget(bool)),this,SLOT(timerSchanged(bool)));
+            writeDs();
+            emit StateChanged( statusBD=notStarted);
+            emit DataBaseCreated(patch);
         }
-        descript.clear();
-        time=new ETime();
-        time->attach(datesave,&autoSem);
-        connect(time,SIGNAL(statusChanget(bool)),this,SLOT(timerSchanged(bool)));
-        writeDs();
-        emit StateChanged( statusBD=notStarted);
-        emit DataBaseCreated(patch);
+        break;
+    }
+    case MySqlMode:{
+        mode=mod;
+        sqlbd=new QSqlDatabase();
+        *sqlbd=QSqlDatabase::addDatabase("QMYSQL",name);
+        sqlbd->setHostName(host_name);
+        sqlbd->setDatabaseName(name);
+        sqlbd->setUserName(userName);
+        sqlbd->setPassword(userPassword);
+        query=new QSqlQuery;
+        sqlSource=new QList<QSqlTableModel>;
+        break;
+    }
+    default:{
+        emit Error(0,"Не коректный тип базы данных.");
+        break;
+    }
+
     }
 }
 bool DataBase::isCreated()const{
@@ -300,7 +324,6 @@ bool DataBase::endTime(){
     QString temp2=pass_;pass_="";
     writeDs(ARhivePatch+"/"+temp+"/");
     for(BPair p:descript){
-        //if(p.first->getSavedState()==)
         this->openGroup(p.first->getName());
         if(p.second==NULL||!p.second->Write(ARhivePatch+"/"+temp+"/"+"SGR"+p.first->getName())){
             emit Error(0,"Ошибка записи в архив, вероятно данные группы "+p.first->getName()+" повреждены");

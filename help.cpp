@@ -26,7 +26,7 @@ Help::Help(QWidget *ptr):QDialog(ptr){
         QHBoxLayout *l=new QHBoxLayout();
         l->addWidget(aboutLogo);
         this->setLayout(l);
-        this->setMinimumSize(650,510);
+        this->setMinimumSize(950,510);
         //this->setMaximumSize(650,510);
         //connect(aboutLogo,SLOT())
         connect(aboutLogo,SIGNAL(anchorClicked(QUrl)),this,SLOT(anchers(QUrl)));

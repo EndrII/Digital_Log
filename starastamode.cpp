@@ -151,7 +151,6 @@ void StarastaMode::StateChanged(StateDataBase st){
     }
 }
 void StarastaMode::GroupChanged(Group *){
-  //  Redraw(thisVoidGroup);
 }
 void StarastaMode::ControlGroupChanged(GroupVoid *gr){
     if(thisVoidGroup==gr)
@@ -167,7 +166,6 @@ void StarastaMode::GroupCreated(Group *){
     ComboWrite(groups);
 }
 void StarastaMode::controlGroupCreated(GroupVoid *gr){
-   // connect(gr,SIGNAL(Warning(QString)),
     GroupOpened(gr);
     gr->setLim(QInputDialog::getInt(this,"Создание отчета","введите лимит пропусков для группы "+gr->getName(),bd->getLastPropusk()));
 }
@@ -222,7 +220,7 @@ void StarastaMode::RedrawLite(GroupVoid *gr){
         for(int i=0;i<tempRow.size();i++){
             for(int j=0;j<tempCol.size();j++){
                 if(j!=tempCol.size()-1||bd->isEnd()){
-                    table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color:  #F0FFFF");
+                    table->cellWidget(i,j)->setStyleSheet("background-color:  #F0FFFF");
                     if((*gr)[i]>(ui)gr->getLim()/2)
                         table->cellWidget(i,j)->setStyleSheet("background-color: yellow");
                     if((*gr)[i]>(ui)gr->getLim())

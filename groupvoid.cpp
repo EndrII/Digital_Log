@@ -146,7 +146,7 @@ void GroupVoid::resetSumm(){
         summa.push_back(temp);
     }
     if(temp1.size()+temp1.size()>0)
-        emit Warning("Обучающиеся с большим количеством пропусков:"+temp1+"\n\n"+ "Обучающиеся с критическим количеством пропусков"+temp2);
+        emit Warning(this,"Обучающиеся с большим количеством пропусков:"+temp1+"\n\n"+ "Обучающиеся с критическим количеством пропусков"+temp2);
 }
 ui GroupVoid::operator [](const int&i){
     return summa[i];

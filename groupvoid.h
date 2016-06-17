@@ -20,7 +20,6 @@ private:
     Group *colums_TEST;
     ETime *rows_TEST;
     void clear();
-
     int limit;
 private slots:
     void Schanged(Group *);
@@ -56,7 +55,7 @@ public:
 signals:
     void noWritedData();
     void Changed(GroupVoid*);
-    void Warning(QString);
+    void Warning(GroupVoid*,QString);
 };
 
 #endif // GROUPVOID_H

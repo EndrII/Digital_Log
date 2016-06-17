@@ -23,8 +23,15 @@ MainWindow::MainWindow(QWidget *parent)
     temp->addWidget(state);
     bd=new DataBase();
     tab=new QTabWidget(this);
+    LogPanel=new QTextEdit();
+    LogPanel->setMaximumWidth(300);
+    LogPanel->setMinimumWidth(300);
+    LogPanel->setReadOnly(true);
     tempPatch="NoArhive";
-    temp->addWidget(tab);
+    QHBoxLayout *temp2=new QHBoxLayout();
+    temp2->addWidget(LogPanel);
+    temp2->addWidget(tab);
+    temp->addLayout(temp2);
     MS=new StarastaMode(bd,this);
     tab->addTab(MS,"Староста");
     QWidget *widget=new QWidget;
@@ -63,6 +70,7 @@ void MainWindow::StateBDChanged(StateDataBase stat){
         mset->setEnabled(false);
         grs->setEnabled(false);
         crea->setEnabled(true);
+        closeA->setEnabled(false);
         break;
     case Arhive:
         state->setText("<center>База данных является архивом!<center>");
@@ -73,6 +81,7 @@ void MainWindow::StateBDChanged(StateDataBase stat){
         mset->setEnabled(false);
         grs->setEnabled(false);
         crea->setEnabled(false);
+        closeA->setEnabled(true);
         break;
     case notStarted:
         state->setText("<center>База данных не ведёт отчёт!<center>");
@@ -83,6 +92,7 @@ void MainWindow::StateBDChanged(StateDataBase stat){
         mset->setEnabled(true);
         grs->setEnabled(true);
         crea->setEnabled(true);
+        closeA->setEnabled(false);
         break;
     case Started:
         state->setText("<center>Ведение отчётов запущено!<center>");
@@ -94,6 +104,7 @@ void MainWindow::StateBDChanged(StateDataBase stat){
         grs->setEnabled(true);
         crea->setEnabled(true);
         openarh->setEnabled(true);
+        closeA->setEnabled(false);
         break;
     default:
         break;
@@ -111,11 +122,11 @@ void MainWindow::CreateLogMenu(){
     connect(openarh,SIGNAL(triggered(bool)),this,SLOT(arhive(bool)));
     temp1->addAction(openarh);
 
-    QAction *temp2=new QAction("Закрыть",this);
-    temp2->setShortcut(QKeySequence::Redo);
-    temp2->setStatusTip("Вернуться к текущей базе даннных");
-    connect(temp2,SIGNAL(triggered(bool)),this,SLOT(closeArhiv(bool)));
-    temp1->addAction(temp2);
+    closeA=new QAction("Закрыть",this);
+    closeA->setShortcut(QKeySequence::Redo);
+    closeA->setStatusTip("Вернуться к текущей базе даннных");
+    connect(closeA,SIGNAL(triggered(bool)),this,SLOT(closeArhiv(bool)));
+    temp1->addAction(closeA);
 
     mset=new QAction("Настройки",this);
     //temp1->setShortcut(QKeySequence::);
@@ -123,7 +134,7 @@ void MainWindow::CreateLogMenu(){
     this->menuBar()->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
-    temp2=new QAction("О DigitalLog",this);
+    QAction *temp2=new QAction("О DigitalLog",this);
     //temp1->setShortcut(QKeySequence::);
     //mset->setStatusTip("Настройки базы данных");
     this->menuBar()->addAction(temp2);
@@ -172,7 +183,13 @@ void MainWindow::toArhiv(bool){
 void MainWindow::AchiveOk(QString str){
     if(tempPatch=="NoArhive")
         tempPatch=bd->getPatch();
-    if(str!="")bd->open(str);
+    if(str!=""){
+        int temp = QMessageBox::question(this, "Предуприждение","открытая база данных будет закрыта, сохранить все изменения?",
+                                      QMessageBox::No|QMessageBox::Yes);
+        if(temp== QMessageBox::Yes)
+            bd->saveAll();
+        bd->open(str);
+    }
 }
 void MainWindow::arhive(bool){
     ReadArchiv *ar=new ReadArchiv(bd->getArhivePatch(),this);
@@ -228,15 +245,18 @@ void MainWindow::start(bool){
     bd->startTime();
 }
 void MainWindow::ControlGroupDeleted(Group *g){
-    QMessageBox::information(this,"Информация","ведение пропусков группы "+g->getName()+" прекращено");
+    //QMessageBox::information(this,"Информация","ведение пропусков группы "+g->getName()+" прекращено");
+    LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": Ведение пропусков группы "+g->getName()+" прекращено<br><br>"+LogPanel->toHtml());
 }
 void MainWindow::Error(int i, QString str){
     switch(i){
-    case 0:QMessageBox::information(this,"Error",str); break;
-    case 1:QMessageBox::information(this,"Error","не возможно записать файл"+str); break;
-    case 2:QMessageBox::information(this,"Error","группа не найдена"+str); break;
-    case 3:QMessageBox::information(this,"Error","ошибка открытия группы"+str); break;
-    case 4:QMessageBox::information(this,"Error","база данных уже создана"+str); break;
+    case -2:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:#FFDEAD;'>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
+    case -1:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
+    case 0:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
+    case 1:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"Не возможно записать файл \""+str+"\"</div><br><br>"+LogPanel->toHtml()); break;
+    case 2:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"группа не найдена "+str+"</div><br><br>"+LogPanel->toHtml());break;
+    case 3:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"Ошибка открытия группы \""+str+"\"</div><br><br>"+LogPanel->toHtml());break;
+    case 4:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"База данных уже создана \""+str+"\"</div><br><br>"+LogPanel->toHtml());break;
     default:break;
     }
 }
@@ -251,7 +271,7 @@ void MainWindow::OpenDB(bool){
     bd->open(QFileDialog::getOpenFileName(this));
 }
 void MainWindow::DataBaseCreated(QString str){
-    QMessageBox::information(this,"BD","База данных создана в "+str);
+    LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": База данных создана в "+str+"<br><br>"+LogPanel->toHtml());
 }
 void MainWindow::closeEvent(QCloseEvent *)
 {

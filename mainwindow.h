@@ -17,10 +17,11 @@
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QVBoxLayout>
-#include "sourcetable.h"
 #include <QTableWidget>
 #include <QPushButton>
 #include <QTableWidget>
+#include <QTextEdit>
+#include <QTime>
 #include "starastamode.h"
 #include "groupmenager.h"
 #include "readarchiv.h"
@@ -32,7 +33,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-   // SourceTable *tbl;
     GroupMenager *grm;
     QString tempPatch;
     DataBase *bd;
@@ -40,10 +40,8 @@ private:
     QTabWidget *tab;
     Setings *st;
     QLabel *state;
-    QAction *arh,*openarh,*sv,*star,*mset,*grs,*crea;
-   // QMenu *mset,*grs;
-   // QRadioButton *StarastaMode;
-   // QRadioButton *PrepodMode;
+    QTextEdit *LogPanel;
+    QAction *arh,*openarh,*sv,*star,*mset,*grs,*crea,*closeA;
     void createGroupMenu();
     void CreateLogMenu();
     void createFileMenu();

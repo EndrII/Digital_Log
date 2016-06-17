@@ -5,12 +5,13 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += sql
 CONFIG   += C++14
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.1.2
+VERSION = 1.0.2.0
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog
@@ -25,14 +26,14 @@ SOURCES += main.cpp\
     groupvoid.cpp \
     EError.cpp \
     database.cpp \
-    sourcetable.cpp \
     starastamode.cpp \
     groupmenager.cpp \
     setings.cpp \
     datewidget.cpp \
     readarchiv.cpp \
     about.cpp \
-    help.cpp
+    help.cpp \
+    sqldatabase.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -41,14 +42,14 @@ HEADERS  += mainwindow.h \
     groupvoid.h \
     EError.h \
     database.h \
-    sourcetable.h \
     starastamode.h \
     groupmenager.h \
     setings.h \
     datewidget.h \
     readarchiv.h \
     about.h \
-    help.h
+    help.h \
+    sqldatabase.h
 
 FORMS +=
 

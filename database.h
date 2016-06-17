@@ -14,15 +14,28 @@
 #include <groupvoid.h>
 #include <QInputDialog>
 #include <QDir>
+#include <QSql>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlTableModel>
 #define HEADER_DB "Header.bdh"
 #define PATCH_NAME_S(GR) patch+"SGR"+GR
 #define PATCH_NAME_P(GR) patch+"PGR"+GR
 enum StateDataBase{notOpened,Arhive,notStarted,Started};
+enum BaseMode{noData,MySqlMode,C_PlusMode};
 typedef QPair<Group*,GroupVoid*> BPair;
 class DataBase:public QObject
 {
     Q_OBJECT
 private:
+    BaseMode mode;
+    //********************************************
+    //SQL Source
+    QSqlDatabase *sqlbd;
+    QSqlQuery *query;
+    QList<QSqlTableModel> *sqlSource;
+    //********************************************
+    //C++ Source
     void PatchCorect();
     QString patch,pass_,ARhivePatch;
     ETime *time;
@@ -53,7 +66,10 @@ public:
     explicit DataBase(const QString& patch_="./Database/",QObject *ptr=NULL);
     bool find(const QString& name);
     bool find(Group*);
-    void createDataBase(const QString& name);
+    void createDataBase(const QString& name,const BaseMode& mode=C_PlusMode,
+                        const QString & host_name="local",
+                        const QString& userName="Admin",
+                        const QString& userPassword="Admin");
     bool createGroup(const QStringList& list, const QString &group);
     bool deleteGroup(const QString&group);
     bool AutoSave;
@@ -87,6 +103,9 @@ public slots:
 signals:
     void Error(int,QString);
     /*
+     *
+     *-2 - Важный текст
+     *-1 - простой текст
      * 0 - простая ошибка с текстом
      * 1 - не возможно записать файл
      * 2 - группа не найденна
