@@ -18,6 +18,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlTableModel>
+#include <QMessageBox>
 #define HEADER_DB "Header.bdh"
 #define PATCH_NAME_S(GR) patch+"SGR"+GR
 #define PATCH_NAME_P(GR) patch+"PGR"+GR

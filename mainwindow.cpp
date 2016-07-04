@@ -184,10 +184,10 @@ void MainWindow::AchiveOk(QString str){
     if(tempPatch=="NoArhive")
         tempPatch=bd->getPatch();
     if(str!=""){
-        int temp = QMessageBox::question(this, "Предуприждение","открытая база данных будет закрыта, сохранить все изменения?",
+        /*int temp = QMessageBox::question(this, "Предуприждение","открытая база данных будет закрыта, сохранить все изменения?",
                                       QMessageBox::No|QMessageBox::Yes);
         if(temp== QMessageBox::Yes)
-            bd->saveAll();
+            bd->saveAll();*/
         bd->open(str);
     }
 }
@@ -250,12 +250,12 @@ void MainWindow::ControlGroupDeleted(Group *g){
 }
 void MainWindow::Error(int i, QString str){
     switch(i){
-    case -2:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:#FFDEAD;'>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
+    case -2:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:#009ACD;'>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
     case -1:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
     case 0:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+str+"</div><br><br>"+LogPanel->toHtml()); break;
     case 1:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"Не возможно записать файл \""+str+"\"</div><br><br>"+LogPanel->toHtml()); break;
     case 2:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"группа не найдена "+str+"</div><br><br>"+LogPanel->toHtml());break;
-    case 3:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"Ошибка открытия группы \""+str+"\"</div><br><br>"+LogPanel->toHtml());break;
+    case 3:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"Ошибка открытия группы \""+str+"\". Для данной группы не ведётся отчёт пропусков, для того что бы начать отчёт выберите и нажмите кнопку \"Начать отчёт\". </div><br><br>"+LogPanel->toHtml());break;
     case 4:LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": <div style='color:red;'>"+"База данных уже создана \""+str+"\"</div><br><br>"+LogPanel->toHtml());break;
     default:break;
     }
@@ -275,8 +275,17 @@ void MainWindow::DataBaseCreated(QString str){
 }
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    if(bd->AutoSave)
-        bd->saveAll();
+    if(bd->AutoSave){
+        if(bd->getState()==notStarted||bd->getState()==Started)
+             bd->saveAll();
+    }
+    else
+        if(bd->getState()==notStarted||bd->getState()==Started){
+            int temp= QMessageBox::question(NULL, "Предупреждении","открытая база данных будет закрыта, сохранить все изменения?",
+                                          QMessageBox::No|QMessageBox::Yes);
+            if(temp== QMessageBox::Yes)
+                bd->saveAll();
+        }
     //grm->close();
 }
 /*void MainWindow::GroupSaved(GroupVoid *){

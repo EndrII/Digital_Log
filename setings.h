@@ -32,8 +32,8 @@ class Setings : public QDialog
 private:
     DateWidget *dateB1,*dateE1,*dateB2,*dateE2;
     DataBase *Bd;
-    QCheckBox *autoSave,*autoGroup,*autoSem;
-    QPushButton *complit,*default_,*cancle,*patchButton,*passChang,*ArhivButton;
+    QCheckBox *autoSave,*autoSem;
+    QPushButton *complit,*default_,*cancle,*patchButton,*passChang,*passClear,*ArhivButton;
     QLineEdit *patch,*patchArhov;
 private slots:
     void autoSemChang(int);
@@ -43,6 +43,7 @@ private slots:
     void patchButtonClick(bool);
     void ArhiveButtonClick(bool);
     void passChanged(bool);
+    void passDelete(bool);
    // void textChanged(QString);
 public:
     explicit Setings(DataBase *bd,QWidget *parent = 0);

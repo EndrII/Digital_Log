@@ -24,7 +24,7 @@
 #include <QDialog>
 #include <QSpacerItem>
 #define Bheight 20
-#define Bwidth 150
+#define Bwidth 180
 #define interval 10
 class GroupMenager : public QDialog
 {
@@ -37,6 +37,7 @@ private:
     QPushButton *add,*dell,*save,*addU;
     void ComboWrite(QComboBox*);
     void TableDisconnect();
+    void save_(bool logUpdate);
 private slots:
     void resizeEvent(QResizeEvent *event);
     void ComboChsnged(int);

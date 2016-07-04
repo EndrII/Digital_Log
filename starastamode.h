@@ -22,7 +22,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #define Bheight 20
-#define Bwidth 150
+#define Bwidth 160
 #define interval 10
 #define thisGroup ((*bd->getDataList())[groups->currentIndex()].first)
 #define thisVoidGroup ((*bd->getDataList())[groups->currentIndex()].second)
@@ -38,13 +38,13 @@ public:
     explicit StarastaMode(DataBase*bd, QWidget *parent = 0);
     QComboBox *groups;
     QPushButton *add;
-    QPushButton *save;
+    QPushButton *change;
     QPushButton *remove;
     QTableWidget *table;
     ~StarastaMode();
 private slots:
     void addClick();
-    void saveClick();
+    void changeClick();
     void removeClick();
     void GroupListChanged(int);
 protected slots:

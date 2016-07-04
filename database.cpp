@@ -20,6 +20,8 @@ DataBase::DataBase(const QString & patch_,QObject *ptr):
     statusBD=notOpened;
     End=false;
     AutoSave=true;
+    autoSaveGroup=true;
+    autoSem=false;
     datesave=new QDate[4];
     time=NULL;
     mode=noData;
@@ -117,6 +119,16 @@ void DataBase::timerSchanged(bool b){
         emit StateChanged(statusBD=notStarted);
 }
 void DataBase::closeAll(){
+    if(AutoSave){
+         if(statusBD==notStarted||statusBD==Started)
+            saveAll();
+    }else
+        if(statusBD==notStarted||statusBD==Started){
+            int temp= QMessageBox::question(NULL, "Предупреждении","открытая база данных будет закрыта, сохранить все изменения?",
+                                         QMessageBox::No|QMessageBox::Yes);
+            if(temp== QMessageBox::Yes)
+                saveAll();
+        }
     for(BPair i:descript){
         delete i.second;
         delete i.first;
@@ -124,10 +136,9 @@ void DataBase::closeAll(){
     descript.clear();
 }
 void DataBase::open(const QString &patch_){
-
+    closeAll();
     if(patch_!="")patch=patch_;
     PatchCorect();
-    closeAll();
     if(!readDS()){
         emit Error(0,"Не удалось открыть Базу данных по пути "+patch);
         emit StateChanged(statusBD);
@@ -207,7 +218,7 @@ void DataBase::readAllBD(){
         }
     }
     if(tempMessage!=""){
-        emit Error(0,"не удалось прочесть следующие группы: "+tempMessage+"возможно для них не видеться журнал.");
+        emit Error(0,"не удалось прочесть следующие группы: "+tempMessage+" возможно для них не видеться журнал.");
     }
 }
 void DataBase::createDataBase(const QString &name,const BaseMode& mod,const QString &host_name,const QString & userName,const QString & userPassword){
@@ -337,7 +348,7 @@ bool DataBase::endTime(){
 }
 bool DataBase::security()const{
     if(this->getPass()!=""){
-        if(QInputDialog::getText(NULL,"безопасность","введите пароль безопасности для входа в настройки базы данных")==this->getPass()){
+        if(QInputDialog::getText(NULL,"Безопасность","Введите пароль безопасности для входа в настройки базы данных")==this->getPass()){
             return true;
         }else{
             return false;
@@ -407,6 +418,11 @@ bool DataBase::deleteControlGroup(Group *gr){
     return true;
 }
 void DataBase::setPass(const QString &pass){
+    if(pass==""){
+        emit Error(-2,"Пароль безопасности удалён!");
+    }else{
+        emit Error(-2,"Пароль безопасности изменен!");
+    }
     pass_=pass;
 }
 QString DataBase::getPass()const{

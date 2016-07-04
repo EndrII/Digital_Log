@@ -37,8 +37,8 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     hbox->addWidget(ArhivButton);
     autoSave=new QCheckBox("Автосохранение Базы данных",this);
     autoSave->setCheckState((Qt::CheckState)(Bd->AutoSave*2));
-    autoGroup=new QCheckBox("Автосохранение менеджера групп",this);
-    autoGroup->setCheckState((Qt::CheckState)(Bd->getAutosaveGroup()*2));
+    //autoGroup=new QCheckBox("Автосохранение менеджера групп",this);
+    //autoGroup->setCheckState((Qt::CheckState)(Bd->getAutosaveGroup()*2));
     autoSem=new QCheckBox("Автоматическое ведение отчётов в семестрах (БЕТА)",this);
     autoSem->setCheckState((Qt::CheckState)(Bd->getAutoSem()*2));
     dateB1=new DateWidget(false,this);
@@ -53,7 +53,7 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     autoSemChang((int)autoSem->checkState());
     vbox->addLayout(hbox);
     vbox->addWidget(autoSave);
-    vbox->addWidget(autoGroup);
+    //vbox->addWidget(autoGroup);
     vbox->addWidget(autoSem);
 
     hbox=new QHBoxLayout(this);
@@ -75,9 +75,11 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     hbox->addWidget(new QLabel("Конец семестра (полугодие 2)"));
     hbox->addWidget(dateE2);
     vbox->addLayout(hbox);
-    passChang=new QPushButton("Изменить пароль безопасности");
+    passChang=new QPushButton("Установить новый пароль безопасности");
     vbox->addWidget(passChang);
-
+    passClear=new QPushButton("Удалить пароль безопасности");
+    vbox->addWidget(passClear);
+    passClear->setEnabled(Bd->getPass()!="");
     hbox=new QHBoxLayout(this);
     cancle=new QPushButton("отмена",this);
     hbox->addWidget(cancle);
@@ -88,6 +90,7 @@ Setings::Setings(DataBase *bd,QWidget *parent):
     vbox->addLayout(hbox);
     connect(ArhivButton,SIGNAL(clicked(bool)),this,SLOT(ArhiveButtonClick(bool)));
     connect(passChang,SIGNAL(clicked(bool)),this,SLOT(passChanged(bool)));
+    connect(passClear,SIGNAL(clicked(bool)),this,SLOT(passDelete(bool)));
     connect(patchButton,SIGNAL(clicked(bool)),this,SLOT(patchButtonClick(bool)));
     //connect(patch,SIGNAL(),this,SLOT(textChanged(QString)));
     connect(complit,SIGNAL(clicked(bool)),this,SLOT(autocomplitClick(bool)));
@@ -111,6 +114,10 @@ void Setings::write(const QString&str){
         f.close();
    // }
 }
+void Setings::passDelete(bool){
+    Bd->setPass("");
+    passClear->setEnabled(false);
+}
 QString Setings::read(){
     QFile f("settings");
     QString temp="Error";
@@ -128,7 +135,11 @@ void Setings::patchButtonClick(bool){
     }
 }
 void Setings::passChanged(bool){
-    Bd->setPass(QInputDialog::getText(this,"Новый пароль","введите новый пароль или оставьте строку пустой что бы отключить его"));
+    QString temp= QInputDialog::getText(this,"Новый пароль","введите новый пароль или оставьте строку пустой что бы отключить его");
+    if(temp!=""){
+        Bd->setPass(temp);
+        passClear->setEnabled(true);
+    }
 }
 void Setings::autoSemChang(int i){
     dateB1->setEnabled(i==2);
@@ -140,7 +151,7 @@ void Setings::autocomplitClick(bool){
     Bd->AutoSave=(autoSave->checkState()==Qt::Checked);
     Bd->setPatch(patch->text());
     Bd->setArhivePatch(patchArhov->text());
-    Bd->setAutosaveGroup(autoGroup->checkState()==Qt::Checked);
+    //Bd->setAutosaveGroup(autoGroup->checkState()==Qt::Checked);
     Bd->setAutoSem(autoSem->checkState()==Qt::Checked);
     if(Bd->getAutoSem()){
         Bd->Dates()[0]=dateB1->getDate();
@@ -153,11 +164,11 @@ void Setings::autocomplitClick(bool){
 }
 void Setings::autodefault_Click(bool){
     autoSave->setCheckState(Qt::Checked);
-    autoGroup->setCheckState(Qt::Unchecked);
+    //autoGroup->setCheckState(Qt::Unchecked);
     autoSem->setCheckState(Qt::Unchecked);
     patch->setText("/DataBase/");
     patchArhov->setText("./");
-    Bd->AutoSave=false;
+    //Bd->AutoSave=false;
 }
 void Setings::autocancleClick(bool){
     this->close();

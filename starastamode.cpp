@@ -17,20 +17,20 @@ StarastaMode::StarastaMode(DataBase *bd_, QWidget *parent) : QWidget(parent)
     groups=new QComboBox(this);
     add=new QPushButton("Начать отчет",this);
     add->setToolTip("Начать вести отчет для выбранной группы");
-    save=new QPushButton("Записать",this);
-    save->setToolTip("записать введенные значения по пропускам");
+    change=new QPushButton("Изменить лимит пропусков",this);
+    change->setToolTip("Изменить предел количества пропусков");
     remove=new QPushButton("удалить отчет",this);
     remove->setToolTip("прекратить вести отчеты для выбранной группы");
     table=new QTableWidget(this);
     groups->setGeometry(interval,interval,Bwidth,Bheight);
     add->setGeometry(1*(interval+Bwidth),interval,Bwidth,Bheight);
-    save->setGeometry(2*(interval+Bwidth),interval,Bwidth,Bheight);
+    change->setGeometry(2*(interval+Bwidth),interval,Bwidth,Bheight);
     remove->setGeometry(3*(interval+Bwidth),interval,Bwidth,Bheight);
     table->setGeometry(interval,2*interval+Bheight,Bwidth,Bheight);
     this->setMinimumSize(640,480);
-    //connect(bd,SIGNAL(gr),this,SLOT(addClick()));
+    change->setEnabled(false);
     connect(add,SIGNAL(clicked(bool)),this,SLOT(addClick()));
-    connect(save,SIGNAL(clicked(bool)),this,SLOT(saveClick()));
+    connect(change,SIGNAL(clicked(bool)),this,SLOT(changeClick()));
     connect(remove,SIGNAL(clicked(bool)),this,SLOT(removeClick()));
     connect(groups,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
 }
@@ -40,15 +40,11 @@ void StarastaMode::resizeEvent(QResizeEvent *){
 void StarastaMode::addClick(){
     bd->createControlGroup(thisGroup);
 }
-void StarastaMode::saveClick(){
-    if(bd->getState()!=Started) return;
-    for(int i=0;i<table->rowCount();i++){
-        thisVoidGroup->ChangeTopElement(i,((QLineEdit*)table->cellWidget(i,table->columnCount()-2))->text().toUInt());
+void StarastaMode::changeClick(){
+    if(bd->security()){
+        thisVoidGroup->setLim(QInputDialog::getInt(this,"Лимит поличество пропусков","текущее максимально доапустимое количество пропусков",thisVoidGroup->getLim(),0));
+        RedrawLite(thisVoidGroup);
     }
-    thisVoidGroup->resetSumm();
-    thisGroup->setSavedState(Saved);
-    save->setEnabled(false);
-    this->RedrawLite(thisVoidGroup);
 }
 void StarastaMode::removeClick(){
     if(bd->getPass()!=""){
@@ -81,6 +77,7 @@ void StarastaMode::GroupDeleted(QString){
     ComboWrite(groups);
 }
 void StarastaMode::GroupListChanged(int gr){
+    change->setEnabled(false);
     TableDisconnect();
     table->clear();
     table->setColumnCount(0);
@@ -113,36 +110,44 @@ void StarastaMode::GroupSaved(GroupVoid *){
 
 }
 void StarastaMode::Editing(){
-    if(bd->getAutosaveGroup()){
+  /*  if(bd->getAutosaveGroup()){
         this->saveClick();
     }else{
         thisGroup->setSavedState(noSaved);
         save->setEnabled(true);
+    }*/
+    if(bd->getState()!=Started) return;
+    for(int i=0;i<table->rowCount();i++){
+        thisVoidGroup->ChangeTopElement(i,((QLineEdit*)table->cellWidget(i,table->columnCount()-2))->text().toUInt());
     }
+    thisVoidGroup->resetSumm();
+    thisGroup->setSavedState(Saved);
+   // change->setEnabled(false);
+    this->RedrawLite(thisVoidGroup);
 }
 void StarastaMode::StateChanged(StateDataBase st){
     switch (st) {
     case notOpened:
         add->setEnabled(false);
-        save->setEnabled(false);
+        change->setEnabled(false);
         remove->setEnabled(false);
         groups->setEnabled(false);
         break;
     case Arhive:
         add->setEnabled(false);
-        save->setEnabled(false);
+        change->setEnabled(false);
         remove->setEnabled(false);
         groups->setEnabled(true);
         break;
     case notStarted:
         add->setEnabled(false);
-        save->setEnabled(false);
+        change->setEnabled(false);
         remove->setEnabled(false);
         groups->setEnabled(false);
         break;
     case Started:
         add->setEnabled(groups->count()>0);
-        //save->setEnabled(true);
+        //change->setEnabled(true);
         remove->setEnabled(groups->count()>0);
         groups->setEnabled(true);
         break;
@@ -160,7 +165,7 @@ void StarastaMode::GroupOpened(GroupVoid *gr){
     Redraw(gr);
     connect(gr,SIGNAL(Changed(GroupVoid*)),this,SLOT(ControlGroupChanged(GroupVoid *)));
     thisGroup->setSavedState(Saved);
-    save->setEnabled(false);
+    change->setEnabled(true);
 }
 void StarastaMode::GroupCreated(Group *){
     ComboWrite(groups);
@@ -168,6 +173,7 @@ void StarastaMode::GroupCreated(Group *){
 void StarastaMode::controlGroupCreated(GroupVoid *gr){
     GroupOpened(gr);
     gr->setLim(QInputDialog::getInt(this,"Создание отчета","введите лимит пропусков для группы "+gr->getName(),bd->getLastPropusk()));
+    change->setEnabled(true);
 }
 void StarastaMode::Redraw(GroupVoid *gr){
     if(gr==NULL)
