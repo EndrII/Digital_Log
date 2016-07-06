@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.2.2
+VERSION = 1.0.3.1
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog
@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     readarchiv.cpp \
     about.cpp \
     help.cpp \
-    sqldatabase.cpp
+    sqldatabase.cpp \
+    MounthDialog.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
     readarchiv.h \
     about.h \
     help.h \
-    sqldatabase.h
+    sqldatabase.h \
+    MounthDialog.h
 
 FORMS +=
 

@@ -16,23 +16,34 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QContextMenuEvent>
 #include <QLineEdit>
 #include "database.h"
 #include <QLabel>
+#include <QMenu>
+#include <QVector>
+#include <QAction>
 #include <QInputDialog>
 #include <QMessageBox>
+#include "MounthDialog.h"
 #define Bheight 20
-#define Bwidth 160
+#define Bwidth 190
 #define interval 10
 #define thisGroup ((*bd->getDataList())[groups->currentIndex()].first)
 #define thisVoidGroup ((*bd->getDataList())[groups->currentIndex()].second)
+#define tableSumWidget(i) (*thisVoidGroup)[indexs[i]]
+
 class StarastaMode : public QWidget
 {
     Q_OBJECT
 private:
     void ComboWrite(QComboBox*);
+    void indexPush(GroupVoid *gr);
     //int oldIndex;
+    QVector<unsigned short> indexs;
     DataBase *bd;
+    QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime;
+    void createContextMenu();
     void TableDisconnect();
 public:
     explicit StarastaMode(DataBase*bd, QWidget *parent = 0);
@@ -43,12 +54,18 @@ public:
     QTableWidget *table;
     ~StarastaMode();
 private slots:
+    void clearFilterClick(bool);
+    void alfavitClick(bool);
+    void maxtominClick(bool);
+    void mintomaxClick(bool);
+    void curentTimeClick(bool);
     void addClick();
     void changeClick();
     void removeClick();
     void GroupListChanged(int);
 protected slots:
     void resizeEvent(QResizeEvent*);
+    void contextMenuEvent(QContextMenuEvent *event);
 signals:
 public slots:
     void StateChanged(StateDataBase st);

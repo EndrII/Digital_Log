@@ -19,7 +19,9 @@ class GroupVoid:public QObject
 private:
     Group *colums_TEST;
     ETime *rows_TEST;
+    bool kolendar[12];
     void clear();
+    int gotWeek;
     int limit;
 private slots:
     void Schanged(Group *);
@@ -34,13 +36,16 @@ public:
     bool addRecord(QVector<ui>*parent=NULL);
     void autoClear();
     QString getName()const;
+    int getGotWeek()const;
     bool ChangeTop(QVector<ui>*parent);
     bool Write(const QString& patch);
     bool Read(const QString& patch);
     bool toArchive(const QString&patch);
+    bool isdrawColumn(const int&i);
     void resetSumm();
     //void printToHtml(const QString);
     ui operator[](const int&);
+    bool * getKolendar();
     int size()const;
     void setLim(const int&lim=48);
     int getLim()const;

@@ -114,7 +114,6 @@ void MainWindow::CreateLogMenu(){
     QMenu * temp1=new QMenu("Архив",this);
     temp1->setStatusTip("Просмотр данных в архиве");
     this->menuBar()->addMenu(temp1);
-   // connect(temp1,SIGNAL(triggered(bool)),this,SLOT((bool)));
 
     openarh=new QAction("Прочесть",this);
     openarh->setShortcut(QKeySequence::Redo);
@@ -129,20 +128,16 @@ void MainWindow::CreateLogMenu(){
     temp1->addAction(closeA);
 
     mset=new QAction("Настройки",this);
-    //temp1->setShortcut(QKeySequence::);
     mset->setStatusTip("Настройки базы данных");
     this->menuBar()->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
     QAction *temp2=new QAction("О DigitalLog",this);
-    //temp1->setShortcut(QKeySequence::);
-    //mset->setStatusTip("Настройки базы данных");
     this->menuBar()->addAction(temp2);
     connect(temp2,SIGNAL(triggered(bool)),this,SLOT(about(bool)));
 
     temp2=new QAction("Справка",this);
     temp2->setShortcut(QKeySequence::HelpContents);
-    //mset->setStatusTip("Настройки базы данных");
     this->menuBar()->addAction(temp2);
     connect(temp2,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
 
@@ -264,14 +259,20 @@ void MainWindow::Exit(bool){
     this->close();
 }
 void MainWindow::CreateDataBase(bool){
-    bd->createDataBase(QFileDialog::getSaveFileName(this));
-    MS->groups->clear();
+    bd->createDataBase(QFileDialog::getSaveFileName(this,"Выберите место расположения и введите имя базе данных","","*.bdh"));
 }
 void MainWindow::OpenDB(bool){
-    bd->open(QFileDialog::getOpenFileName(this));
+    bd->open(QFileDialog::getOpenFileName(this,"Выберите базу данных","","*.bdh"));
 }
 void MainWindow::DataBaseCreated(QString str){
+    MS->groups->clear();
     LogPanel->setText(QTime::currentTime().toString("hh:mm:ss")+": База данных создана в "+str+"<br><br>"+LogPanel->toHtml());
+}
+void MainWindow::addFilter(bool){
+
+}
+void MainWindow::clearFilter(bool){
+
 }
 void MainWindow::closeEvent(QCloseEvent *)
 {

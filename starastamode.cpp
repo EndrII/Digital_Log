@@ -27,8 +27,9 @@ StarastaMode::StarastaMode(DataBase *bd_, QWidget *parent) : QWidget(parent)
     change->setGeometry(2*(interval+Bwidth),interval,Bwidth,Bheight);
     remove->setGeometry(3*(interval+Bwidth),interval,Bwidth,Bheight);
     table->setGeometry(interval,2*interval+Bheight,Bwidth,Bheight);
-    this->setMinimumSize(640,480);
+    this->setMinimumSize(800,480);
     change->setEnabled(false);
+    createContextMenu();
     connect(add,SIGNAL(clicked(bool)),this,SLOT(addClick()));
     connect(change,SIGNAL(clicked(bool)),this,SLOT(changeClick()));
     connect(remove,SIGNAL(clicked(bool)),this,SLOT(removeClick()));
@@ -53,8 +54,10 @@ void StarastaMode::removeClick(){
             temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
                                           QMessageBox::Yes|QMessageBox::No);
             if(temp==QMessageBox::Yes){
-                if(bd->deleteControlGroup(thisGroup))
-                      this->Redraw(thisVoidGroup);
+                if(bd->deleteControlGroup(thisGroup)){
+                    change->setEnabled(false);
+                    this->Redraw(thisVoidGroup);
+                }
             }
 
         }else{
@@ -65,8 +68,10 @@ void StarastaMode::removeClick(){
         temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
                                       QMessageBox::Yes|QMessageBox::No);
         if(temp==QMessageBox::Yes){
-            if(bd->deleteControlGroup(thisGroup))
+            if(bd->deleteControlGroup(thisGroup)){
+                change->setEnabled(false);
                 this->Redraw(thisVoidGroup);
+            }
         }
     }
 }
@@ -107,23 +112,15 @@ void StarastaMode::TableDisconnect(){
         }
 }
 void StarastaMode::GroupSaved(GroupVoid *){
-
 }
 void StarastaMode::Editing(){
-  /*  if(bd->getAutosaveGroup()){
-        this->saveClick();
-    }else{
-        thisGroup->setSavedState(noSaved);
-        save->setEnabled(true);
-    }*/
     if(bd->getState()!=Started) return;
     for(int i=0;i<table->rowCount();i++){
-        thisVoidGroup->ChangeTopElement(i,((QLineEdit*)table->cellWidget(i,table->columnCount()-2))->text().toUInt());
+        thisVoidGroup->ChangeTopElement(indexs[i],((QLineEdit*)table->cellWidget(i,table->columnCount()-2))->text().toUInt());
     }
     thisVoidGroup->resetSumm();
     thisGroup->setSavedState(Saved);
-   // change->setEnabled(false);
-    this->RedrawLite(thisVoidGroup);
+     this->RedrawLite(thisVoidGroup);
 }
 void StarastaMode::StateChanged(StateDataBase st){
     switch (st) {
@@ -155,13 +152,107 @@ void StarastaMode::StateChanged(StateDataBase st){
         break;
     }
 }
+void StarastaMode::createContextMenu(){
+    clearFilter=new QAction("Очистить фильтры");
+    clearFilter->setStatusTip("Удалит все фильтры из таблицы");
+    connect(clearFilter,SIGNAL(triggered(bool)),this,SLOT(clearFilterClick(bool)));
+
+    alfavit=new QAction("По алфавиту");
+    alfavit->setStatusTip("Отсортирует таблицу по алфавиту");
+    connect(alfavit,SIGNAL(triggered(bool)),this,SLOT(alfavitClick(bool)));
+
+    maxtomin=new QAction("По убыванию");
+    maxtomin->setStatusTip("Отсортирует таблицу по убыванию");
+    connect(maxtomin,SIGNAL(triggered(bool)),this,SLOT(maxtominClick(bool)));
+
+    mintomax=new QAction("По возрастанию");
+    mintomax->setStatusTip("Отсортирует таблицу по возрастанию");
+    connect(mintomax,SIGNAL(triggered(bool)),this,SLOT(mintomaxClick(bool)));
+
+    curentTime=new QAction("Выбор временного интервала");
+    curentTime->setStatusTip("Выбрать за какой месяц отображать данные");
+    connect(curentTime,SIGNAL(triggered(bool)),this,SLOT(curentTimeClick(bool)));
+}
+void StarastaMode::clearFilterClick(bool){
+    indexPush(thisVoidGroup);
+    this->Redraw(thisVoidGroup);
+}
+void StarastaMode::alfavitClick(bool){
+    QStringList s=thisVoidGroup->getColumsHeader();
+    bool Switcher=true;
+    int siz=s.size();
+    while(Switcher&&siz){
+        Switcher=false;
+        for(int i=1;i<siz;i++){
+            if(s[indexs[i]].compare(s[indexs[i-1]],Qt::CaseInsensitive)<0){
+                Switcher=true;
+                unsigned int temp= indexs[i];
+                indexs[i]=indexs[i-1];
+                indexs[i-1]=temp;
+            }
+        }
+        siz--;
+    }
+    this->Redraw(thisVoidGroup);
+}
+void StarastaMode::maxtominClick(bool){
+    QStringList s=thisVoidGroup->getColumsHeader();
+    bool Switcher=true;
+    int siz=s.size();
+    while(Switcher&&siz){
+        Switcher=false;
+        for(int i=1;i<siz;i++){
+            if(tableSumWidget(i)<tableSumWidget(i-1)){
+              //  QString::toInt();
+                Switcher=true;
+                unsigned int temp= indexs[i];
+                indexs[i]=indexs[i-1];
+                indexs[i-1]=temp;
+            }
+        }
+        siz--;
+    }
+    this->Redraw(thisVoidGroup);
+}
+void StarastaMode::mintomaxClick(bool){
+    QStringList s=thisVoidGroup->getColumsHeader();
+    bool Switcher=true;
+    int siz=s.size();
+    while(Switcher&&siz){
+        Switcher=false;
+        for(int i=1;i<siz;i++){
+            if(tableSumWidget(i)>tableSumWidget(i-1)){
+              //  QString::toInt();
+                Switcher=true;
+                unsigned int temp= indexs[i];
+                indexs[i]=indexs[i-1];
+                indexs[i-1]=temp;
+            }
+        }
+        siz--;
+    }
+    this->Redraw(thisVoidGroup);
+}
+void StarastaMode::curentTimeClick(bool){
+    MounthDialog mou(thisVoidGroup->getKolendar(),this);
+    mou.exec();
+    this->Redraw(thisVoidGroup);
+}
 void StarastaMode::GroupChanged(Group *){
 }
+void StarastaMode::indexPush(GroupVoid *gr){
+    indexs.clear();
+    for(int i=0;i<gr->getColumsHeader().size();i++)
+        indexs.push_back(i);
+}
 void StarastaMode::ControlGroupChanged(GroupVoid *gr){
-    if(thisVoidGroup==gr)
-      Redraw(thisVoidGroup);
+    if(thisVoidGroup==gr){
+        indexPush(gr);
+        Redraw(thisVoidGroup);
+    }
 }
 void StarastaMode::GroupOpened(GroupVoid *gr){
+    indexPush(gr);
     Redraw(gr);
     connect(gr,SIGNAL(Changed(GroupVoid*)),this,SLOT(ControlGroupChanged(GroupVoid *)));
     thisGroup->setSavedState(Saved);
@@ -176,45 +267,47 @@ void StarastaMode::controlGroupCreated(GroupVoid *gr){
     change->setEnabled(true);
 }
 void StarastaMode::Redraw(GroupVoid *gr){
+    table->clear();
     if(gr==NULL)
     {
-        table->clear();
         table->setRowCount(0);
         table->setColumnCount(0);
-
     }else{
+        gr->resetSumm();
         QList<QString> tempRow=gr->getColumsHeader();
         QList<QString> tempCol=gr->getRowsHeader();
-        table->setRowCount(gr->getColumsHeader().size());
-        table->setColumnCount(gr->getRowsHeader().size()+1);
-        gr->resetSumm();
+        table->setRowCount(tempRow.size());
+        table->setColumnCount(gr->getGotWeek()+1);
         for(int i=0;i<tempRow.size();i++){
-            table->setVerticalHeaderItem(i,new QTableWidgetItem(tempRow[i]));
+
+            table->setVerticalHeaderItem(i,new QTableWidgetItem(tempRow[indexs[i]]));
+            int tempIndex=0;
             for(int j=0;j<tempCol.size();j++){
-                if(i==0)table->setHorizontalHeaderItem(j,new QTableWidgetItem(tempCol[j]));
+                if(gr->isdrawColumn(j)) continue;
+                if(i==0)table->setHorizontalHeaderItem(tempIndex,new QTableWidgetItem(tempCol[j]));
                 if(j!=tempCol.size()-1||bd->isEnd()){
-                    table->setCellWidget(i,j,new QLabel(QString::number(gr->getItem(j,i))));
-                    table->cellWidget(i,j)->setStyleSheet("background-color:  #F0FFFF");
-                    if((*gr)[i]>(ui)gr->getLim()/2)
-                        table->cellWidget(i,j)->setStyleSheet("background-color: yellow");
-                    if((*gr)[i]>(ui)gr->getLim())
-                        table->cellWidget(i,j)->setStyleSheet("background-color: #ff4500");
+                    table->setCellWidget(i,tempIndex,new QLabel(QString::number(gr->getItem(j,indexs[i]))));
+                    table->cellWidget(i,tempIndex)->setStyleSheet("background-color:  #F0FFFF");
+                    if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
+                        table->cellWidget(i,tempIndex)->setStyleSheet("background-color: yellow");
+                    if((*gr)[indexs[i]]>(ui)gr->getLim())
+                        table->cellWidget(i,tempIndex)->setStyleSheet("background-color: #ff4500");
                 }
                 else{
-                    table->setCellWidget(i,j,new QLineEdit(QString::number(gr->getItem(j,i))));
-                    connect((QLineEdit*)table->cellWidget(i,j),SIGNAL(editingFinished()),this,SLOT(Editing()));
+                    table->setCellWidget(i,tempIndex,new QLineEdit(QString::number(gr->getItem(j,indexs[i]))));
+                    connect((QLineEdit*)table->cellWidget(i,tempIndex),SIGNAL(editingFinished()),this,SLOT(Editing()));
                 }
                     //table->horizontalHeader()
-                //temp++;
+                tempIndex++;
             }
         }
         table->setHorizontalHeaderItem(table->columnCount()-1,new QTableWidgetItem("Сумма"));
         for(int i=0;i<gr->size();i++){
-            table->setCellWidget(i,table->columnCount()-1,new QLabel(QString::number((*gr)[i])));
+            table->setCellWidget(i,table->columnCount()-1,new QLabel(QString::number((*gr)[indexs[i]])));
             table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color:  #F0FFFF");
-            if((*gr)[i]>(ui)gr->getLim()/2)
+            if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
                 table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: yellow");
-            if((*gr)[i]>(ui)gr->getLim())
+            if((*gr)[indexs[i]]>(ui)gr->getLim())
                 table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: #ff4500");
         }
     }
@@ -224,28 +317,41 @@ void StarastaMode::RedrawLite(GroupVoid *gr){
         QList<QString> tempRow=gr->getColumsHeader();
         QList<QString> tempCol=gr->getRowsHeader();
         for(int i=0;i<tempRow.size();i++){
-            for(int j=0;j<tempCol.size();j++){
+            for(int j=0;j<gr->getGotWeek();j++){
+                if(gr->isdrawColumn(j)) continue;
                 if(j!=tempCol.size()-1||bd->isEnd()){
                     table->cellWidget(i,j)->setStyleSheet("background-color:  #F0FFFF");
-                    if((*gr)[i]>(ui)gr->getLim()/2)
+                    if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
                         table->cellWidget(i,j)->setStyleSheet("background-color: yellow");
-                    if((*gr)[i]>(ui)gr->getLim())
+                    if((*gr)[indexs[i]]>(ui)gr->getLim())
                         table->cellWidget(i,j)->setStyleSheet("background-color: #ff4500");
                 }
                 else{
-                    ((QLineEdit*)table->cellWidget(i,j))->setText(QString::number(gr->getItem(j,i)));
+                    ((QLineEdit*)table->cellWidget(i,j))->setText(QString::number(gr->getItem(j,indexs[i])));
                 }
             }
         }
         table->setHorizontalHeaderItem(table->columnCount()-1,new QTableWidgetItem("Сумма"));
         for(int i=0;i<gr->size();i++){
-            ((QLabel*)table->cellWidget(i,table->columnCount()-1))->setText(QString::number((*gr)[i]));
+            ((QLabel*)table->cellWidget(i,table->columnCount()-1))->setText(QString::number((*gr)[indexs[i]]));
             table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color:  #F0FFFF");
-            if((*gr)[i]>(ui)gr->getLim()/2)
+            if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
                 table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: yellow");
-            if((*gr)[i]>(ui)gr->getLim())
+            if((*gr)[indexs[i]]>(ui)gr->getLim())
                 table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: #ff4500");
         }
+}
+
+void StarastaMode::contextMenuEvent(QContextMenuEvent *event){
+    if(change->isEnabled()){
+        QMenu menu(this);
+        menu.addAction(alfavit);
+        menu.addAction(maxtomin);
+        menu.addAction(mintomax);
+        menu.addAction(curentTime);
+        menu.addAction(clearFilter);
+        menu.exec(event->globalPos());
+    }
 }
 StarastaMode::~StarastaMode(){
 

@@ -94,7 +94,7 @@ void GroupMenager::del(){
 }
 void GroupMenager::edited(){
     //if(bd->getAutosaveGroup())
-        save_(false);
+      //  save_(false);
     save->setEnabled(true);
 }
 void GroupMenager::add_(){

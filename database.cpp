@@ -333,11 +333,11 @@ bool DataBase::endTime(){
     End=true;
     emit StateChanged(statusBD=notStarted);
     QString temp2=pass_;pass_="";
-    writeDs(ARhivePatch+"/"+temp+"/");
+    writeDs(ARhivePatch+"/"+temp+"/Archive");
     for(BPair p:descript){
         this->openGroup(p.first->getName());
-        if(p.second==NULL||!p.second->Write(ARhivePatch+"/"+temp+"/"+"SGR"+p.first->getName())){
-            emit Error(0,"Ошибка записи в архив, вероятно данные группы "+p.first->getName()+" повреждены");
+        if(p.second==NULL||!p.second->Write(ARhivePatch+"/"+temp+"/"+"ArchiveSGR"+p.first->getName())){
+            emit Error(-1,"Ошибка записи в архив, вероятно для группы "+p.first->getName()+" не ведаться учет пропусков ");
         }
         this->deleteControlGroup(p.first);
     }

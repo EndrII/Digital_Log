@@ -50,6 +50,8 @@ private:
 private slots:
     void Error(int,QString);
     void DataBaseCreated(QString);
+    void addFilter(bool);
+    void clearFilter(bool);
     void Save(bool);
     void about(bool);
     void help(bool);

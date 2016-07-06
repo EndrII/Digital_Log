@@ -19,7 +19,7 @@
 #include <QSqlQuery>
 #include <QSqlTableModel>
 #include <QMessageBox>
-#define HEADER_DB "Header.bdh"
+#define HEADER_DB ".bdh"
 #define PATCH_NAME_S(GR) patch+"SGR"+GR
 #define PATCH_NAME_P(GR) patch+"PGR"+GR
 enum StateDataBase{notOpened,Arhive,notStarted,Started};

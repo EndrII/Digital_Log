@@ -15,7 +15,9 @@ GroupVoid::GroupVoid( Group *gr, ETime *system, QObject *ptr):
 {
     rows=system;
     colums=gr;
-    limit=0;
+    gotWeek=limit=0;
+    for(int i=0;i<12;i++)
+        kolendar[i]=true;
     colums_TEST=new Group;
     rows_TEST=new ETime;
     connect(rows,SIGNAL(append(const QVector<QDate>*)),this,SLOT(append(const QVector<QDate>*)));
@@ -66,6 +68,9 @@ bool GroupVoid::addRecord(QVector<ui> *parent){
 QString GroupVoid::getName()const
 {
     return colums->getName();
+}
+int GroupVoid::getGotWeek()const{
+    return gotWeek;
 }
 bool GroupVoid::ChangeTop(QVector<ui> *parent){
     if(parent!=NULL&&parent->size()==colums->size()){
@@ -133,9 +138,12 @@ void GroupVoid::resetSumm(){
     QString temp1="",temp2="";
     summa.clear();
     for(int j=0;j<dataStudents[0]->size();j++){
-        temp=0;
+        gotWeek=temp=0;
         for(int i=0;i<dataStudents.size();i++){
-            temp+=(*dataStudents[i])[j];
+            if(kolendar[(*rows)[i].month()-1]){
+                temp+=(*dataStudents[i])[j];
+                gotWeek++;
+            }
         }
         if(temp>limit/2){
             temp1+="\n"+(*colums)[j];
@@ -150,6 +158,9 @@ void GroupVoid::resetSumm(){
 }
 ui GroupVoid::operator [](const int&i){
     return summa[i];
+}
+bool *GroupVoid::getKolendar(){
+    return kolendar;
 }
 int GroupVoid::size()const{
     return summa.size();
@@ -212,6 +223,9 @@ bool GroupVoid::toArchive(const QString &patch){
     bool temp =this->Write(patch);
     rows->start();
     return temp;
+}
+bool GroupVoid::isdrawColumn(const int &i){
+    return !kolendar[(*rows)[i].month()-1];
 }
 GroupVoid::~GroupVoid(){
     for(QVector<ui>* i:dataStudents){
