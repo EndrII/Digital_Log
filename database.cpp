@@ -115,8 +115,10 @@ void DataBase::groupChangedDeligate(Group *gr){
 void DataBase::timerSchanged(bool b){
     if(b)
         emit StateChanged(statusBD=Started);
-    else
+    else{
         emit StateChanged(statusBD=notStarted);
+        //endTime();
+    }
 }
 void DataBase::closeAll(){
     if(AutoSave){

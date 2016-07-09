@@ -30,10 +30,14 @@ ui GroupVoid::getItem(const int row, const int col){
     return (*dataStudents[row])[col];
 }
 void GroupVoid::setLim(const int &lim){
-    limit=lim;
+    if(rows->isStarted())
+        limit=lim;
 }
-int GroupVoid::getLim()const{
-    return limit;
+int GroupVoid::getLim(bool absolut)const{
+    if(gotWeek!=0&&!absolut)
+        return limit*gotWeek/dataStudents.size();
+    else
+        return limit;
 }
 QStringList GroupVoid::getRowsHeader()const{
     return rows->getList();
@@ -68,6 +72,9 @@ bool GroupVoid::addRecord(QVector<ui> *parent){
 QString GroupVoid::getName()const
 {
     return colums->getName();
+}
+QString& GroupVoid::getLastReport(){
+    return report;
 }
 int GroupVoid::getGotWeek()const{
     return gotWeek;
@@ -137,24 +144,34 @@ void GroupVoid::resetSumm(){
     unsigned int temp=0;
     QString temp1="",temp2="";
     summa.clear();
+    bool tempBool=true;
+    for(int i=0;i<12;i++)
+        tempBool=tempBool&&!kolendar[i];
     for(int j=0;j<dataStudents[0]->size();j++){
         gotWeek=temp=0;
         for(int i=0;i<dataStudents.size();i++){
-            if(kolendar[(*rows)[i].month()-1]){
+            if(kolendar[(*rows)[i].month()-1]||tempBool){
                 temp+=(*dataStudents[i])[j];
-                gotWeek++;
+                if(!tempBool)gotWeek++;
             }
         }
-        if(temp>limit/2){
-            temp1+="\n"+(*colums)[j];
-        }
-        if(temp>limit){
-            temp2+="\n"+(*colums)[j];
+        if(temp>(limit*(tempBool)?1:(gotWeek/dataStudents.size()))){
+            temp2+="<br>"+(*colums)[j];
+        }else
+        if(temp>(limit/2*(tempBool)?1:(gotWeek/dataStudents.size()))){
+            temp1+="<br>"+(*colums)[j];
         }
         summa.push_back(temp);
     }
-    if(temp1.size()+temp1.size()>0)
-        emit Warning(this,"Обучающиеся с большим количеством пропусков:"+temp1+"\n\n"+ "Обучающиеся с критическим количеством пропусков"+temp2);
+    report.clear();
+    if(temp1>0)
+        report+="Обучающиеся с большим количеством пропусков:"+temp1+"<br><br>";
+    if(temp2>0)
+        report+="Обучающиеся с критическим количеством пропусков:"+temp2+"<br>";
+    if(temp1.size()+temp2.size()>0)
+        emit Warning(this,report);
+    else
+        report+="У всех обучающихся допустимое количество пропусков.<br>";
 }
 ui GroupVoid::operator [](const int&i){
     return summa[i];

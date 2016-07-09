@@ -90,8 +90,8 @@ bool ETime::start(){
 }
 void ETime::stop(){
     timer.stop();
+    if(started)    emit statusChanget(false);
     started=false;
-    emit statusChanget(false);
 }
 bool ETime::isStarted(){
     return started;

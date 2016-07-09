@@ -21,6 +21,7 @@ private:
     ETime *rows_TEST;
     bool kolendar[12];
     void clear();
+    QString report;
     int gotWeek;
     int limit;
 private slots:
@@ -36,6 +37,7 @@ public:
     bool addRecord(QVector<ui>*parent=NULL);
     void autoClear();
     QString getName()const;
+    QString& getLastReport();
     int getGotWeek()const;
     bool ChangeTop(QVector<ui>*parent);
     bool Write(const QString& patch);
@@ -48,7 +50,7 @@ public:
     bool * getKolendar();
     int size()const;
     void setLim(const int&lim=48);
-    int getLim()const;
+    int getLim(bool absolut=false)const;
     ui getItem(const int row,const int col);
     QStringList getRowsHeader()const;
     QStringList getColumsHeader()const;

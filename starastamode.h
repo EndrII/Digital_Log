@@ -25,7 +25,9 @@
 #include <QAction>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QFileDialog>
 #include "MounthDialog.h"
+#include "Printer.h"
 #define Bheight 20
 #define Bwidth 190
 #define interval 10
@@ -42,7 +44,7 @@ private:
     //int oldIndex;
     QVector<unsigned short> indexs;
     DataBase *bd;
-    QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime;
+    QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime,*PrintHTML,*PrintPDF,*onlySumm;
     void createContextMenu();
     void TableDisconnect();
 public:
@@ -52,6 +54,7 @@ public:
     QPushButton *change;
     QPushButton *remove;
     QTableWidget *table;
+  //  static void print(QTableWidget *Table,QString patch="./");
     ~StarastaMode();
 private slots:
     void clearFilterClick(bool);
@@ -59,6 +62,9 @@ private slots:
     void maxtominClick(bool);
     void mintomaxClick(bool);
     void curentTimeClick(bool);
+    void ClickPrintHTML(bool);
+    void ClickPrintPDF(bool);
+    void ClickOnlySumm(bool);
     void addClick();
     void changeClick();
     void removeClick();

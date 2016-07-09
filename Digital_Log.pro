@@ -6,12 +6,13 @@
 
 QT       += core gui
 QT       += sql
+QT += printsupport
 CONFIG   += C++14
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.3.1
+VERSION = 1.0.3.2
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog
@@ -34,7 +35,8 @@ SOURCES += main.cpp\
     about.cpp \
     help.cpp \
     sqldatabase.cpp \
-    MounthDialog.cpp
+    MounthDialog.cpp \
+    Printer.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -51,7 +53,8 @@ HEADERS  += mainwindow.h \
     about.h \
     help.h \
     sqldatabase.h \
-    MounthDialog.h
+    MounthDialog.h \
+    Printer.h
 
 FORMS +=
 

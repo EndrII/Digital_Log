@@ -43,7 +43,7 @@ void StarastaMode::addClick(){
 }
 void StarastaMode::changeClick(){
     if(bd->security()){
-        thisVoidGroup->setLim(QInputDialog::getInt(this,"Лимит поличество пропусков","текущее максимально доапустимое количество пропусков",thisVoidGroup->getLim(),0));
+        thisVoidGroup->setLim(QInputDialog::getInt(this,"Лимит поличество пропусков","текущее максимально доапустимое количество пропусков",thisVoidGroup->getLim(true),0));
         RedrawLite(thisVoidGroup);
     }
 }
@@ -152,6 +152,9 @@ void StarastaMode::StateChanged(StateDataBase st){
         break;
     }
 }
+/*void StarastaMode::print(QTableWidget *Table, QString patch){
+
+}*/
 void StarastaMode::createContextMenu(){
     clearFilter=new QAction("Очистить фильтры");
     clearFilter->setStatusTip("Удалит все фильтры из таблицы");
@@ -172,9 +175,38 @@ void StarastaMode::createContextMenu(){
     curentTime=new QAction("Выбор временного интервала");
     curentTime->setStatusTip("Выбрать за какой месяц отображать данные");
     connect(curentTime,SIGNAL(triggered(bool)),this,SLOT(curentTimeClick(bool)));
+
+    PrintHTML=new QAction("Сохронить отчёт в HTML");
+    PrintHTML->setStatusTip("Сохронить отчёт в HTML");
+    connect(PrintHTML,SIGNAL(triggered(bool)),this,SLOT(ClickPrintHTML(bool)));
+
+    PrintPDF=new QAction("Сохронить отчёт в PDF");
+    PrintPDF->setStatusTip("Сохронить отчёт в PDF");
+    connect(PrintPDF,SIGNAL(triggered(bool)),this,SLOT(ClickPrintPDF(bool)));
+
+    onlySumm=new QAction("Только сумма");
+    onlySumm->setStatusTip("Покажет только общее количество пропусков за всё время");
+    connect(onlySumm,SIGNAL(triggered(bool)),this,SLOT(ClickOnlySumm(bool)));
+
+}
+void StarastaMode::ClickOnlySumm(bool){
+    bool* temp= thisVoidGroup->getKolendar();
+    for(int i=0;i<12;i++)
+        temp[i]=false;
+    this->Redraw(thisVoidGroup);
+
+}
+void StarastaMode::ClickPrintPDF(bool){
+    Printer::printPDF(this->table,thisVoidGroup->getLastReport(),QFileDialog::getSaveFileName(this,"Создание отчёта в PDF","./","*.pdf"));
+}
+void StarastaMode::ClickPrintHTML(bool){
+    Printer::printHtml(this->table,thisVoidGroup->getLastReport(),QFileDialog::getSaveFileName(this,"Создание отчёта в HTML","./","*.html"));
 }
 void StarastaMode::clearFilterClick(bool){
     indexPush(thisVoidGroup);
+    bool* temp= thisVoidGroup->getKolendar();
+    for(int i=0;i<12;i++)
+        temp[i]=true;
     this->Redraw(thisVoidGroup);
 }
 void StarastaMode::alfavitClick(bool){
@@ -202,7 +234,7 @@ void StarastaMode::maxtominClick(bool){
     while(Switcher&&siz){
         Switcher=false;
         for(int i=1;i<siz;i++){
-            if(tableSumWidget(i)<tableSumWidget(i-1)){
+            if(tableSumWidget(i)>tableSumWidget(i-1)){
               //  QString::toInt();
                 Switcher=true;
                 unsigned int temp= indexs[i];
@@ -221,7 +253,7 @@ void StarastaMode::mintomaxClick(bool){
     while(Switcher&&siz){
         Switcher=false;
         for(int i=1;i<siz;i++){
-            if(tableSumWidget(i)>tableSumWidget(i-1)){
+            if(tableSumWidget(i)<tableSumWidget(i-1)){
               //  QString::toInt();
                 Switcher=true;
                 unsigned int temp= indexs[i];
@@ -345,10 +377,13 @@ void StarastaMode::RedrawLite(GroupVoid *gr){
 void StarastaMode::contextMenuEvent(QContextMenuEvent *event){
     if(change->isEnabled()){
         QMenu menu(this);
+        menu.addAction(PrintHTML);
+        menu.addAction(PrintPDF);
         menu.addAction(alfavit);
         menu.addAction(maxtomin);
         menu.addAction(mintomax);
         menu.addAction(curentTime);
+        menu.addAction(onlySumm);
         menu.addAction(clearFilter);
         menu.exec(event->globalPos());
     }
