@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>help/logo.png</file>
+        <file>help/settings.html</file>
+        <file>help/monual.html</file>
+        <file>help/menu.html</file>
+        <file>help/index.html</file>
+        <file>help/groups.html</file>
+        <file>help/About.html</file>
+    </qresource>
+</RCC>
