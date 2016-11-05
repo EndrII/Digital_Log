@@ -44,6 +44,7 @@ public:
     bool isStarted();
     //bool tested();
     QStringList getList()const;
+    void setDates(const QVector<QDate>&dat);
     int sizes(const ETime&A);
     int size()const;
     bool find(const QDate& data)const;

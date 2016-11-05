@@ -27,6 +27,12 @@ QStringList ETime::getList() const{
         temp.push_back(i.toString());
     return temp;
 }
+void ETime::setDates(const QVector<QDate> &dat){
+    SourceDate.clear();
+    for(QDate i:dat){
+        SourceDate.push_back(i);
+    }
+}
 int ETime::size()const{
     return SourceDate.size();
 }
