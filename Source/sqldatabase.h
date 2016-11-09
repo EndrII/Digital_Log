@@ -7,6 +7,7 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #define PORT 2277
+enum state_BD{disconected,stoped,conectd};
 class sqlDataBase:public QObject, protected QSqlDatabase{
     Q_OBJECT
 private:
@@ -15,10 +16,13 @@ private:
     QSqlQueryModel *model;
 private slots:
 protected:
+    void error_msg();
     bool SqlExec(QSqlQuery*,const QString &sqlFile);
+
 public:
-    explicit sqlDataBase(const QString&user, const QString&pass, const QString &host,const QString &dataBaseName="mysql");
+    explicit sqlDataBase();
     QSqlQuery* registration();
+    void connect_to(const QString&user="", const QString&pass="", const QString &host="",const QString& port="");
     void openDB(const QString &BaseName);
     void createGroup(const QString &GroupName);
     void createPredmet(const QString &PredemtName);
@@ -47,6 +51,7 @@ signals:
      * 1 - простой текст
      * 0 - простая ошибка с текстом
     */
+    void stateChanged(state_BD);
     void Message(int,QString);
 };
 #endif // SQLDATABASE_H

@@ -1,3 +1,6 @@
+/*version - 1.1.5*/
+
+
 create table config_flags(
 id int NOT NULL AUTO_INCREMENT,
 Описание VARCHAR(100),
@@ -5,9 +8,7 @@ flag int NOT NULL DEFAULT 0,
 PRIMARY KEY(id) 
 )ENGINE=InnoDB CHARACTER SET=UTF8;
 insert into config_flags(id,Описание,flag) values 
-(1,'состояние базы данных 	(0 - Ни разу не запускалась )
-							(1 - Запущена
-							(2 - Остановленна',0),
+(1,'состояние базы данных 	(0 - Остановленна 1 - Запущена ',0),
 (2,'день отчетности успеваемости (1 - 28)',1),
 (3,'день недели отчётности пропусков (0-6)',6);
 
@@ -59,12 +60,13 @@ IN time VARCHAR(100))
 BEGIN
 	DECLARE i INT DEFAULT (SELECT COUNT(*) FROM
 	information_schema.COLUMNS WHERE TABLE_NAME=name);
-		SET @sql= CONCAT('select count(Даты) from ',
+		SET @len=0;
+		SET @sql= CONCAT('select count(Даты) INTO @len from ',
 		time, ');');
 		PREPARE getCountrySql FROM @sql;
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;
-	WHILE i<=len DO
+	WHILE i<=@len DO
 		SET @temp=(select DATE_FORMAT((select Даты from
 		времяПропуски WHERE времяПропуски.id=i),
 		'%d_%m_%Y'));
@@ -98,7 +100,8 @@ BEGIN
 	update группы set  num=(
 	SELECT @number_:= @number_ + 1 FROM
 	(SELECT @number_:= 0) as tbl);	
-	SET @sql= CONCAT('CREATE TABLE P_',name,'( 
+	SET @sql= CONCAT('CREATE TABLE P_',name,'(
+	num INT, 
 	предмет VARCHAR(100) NOT NULL UNIQUE,
 	FOREIGN KEY(предмет) REFERENCES предметы(Наименование)
 	ON UPDATE CASCADE
@@ -138,7 +141,7 @@ DELIMITER ;
 
 DELIMITER |
 CREATE PROCEDURE addPredmet(IN Name VARCHAR(100)CHARACTER SET utf8,
- IN Gr VARCHAR(100) CHARACTER SET utf8)
+ IN Gr VARCHAR(100) CHARACTER SET utf8, IN NUM_UPDATE INT)
 	NOT DETERMINISTIC
     SQL SECURITY INVOKER
     COMMENT 'Добавит предмет группе'
@@ -157,6 +160,15 @@ BEGIN
 	PREPARE getCountrySql FROM @sql;
 	EXECUTE getCountrySql;
 	DEALLOCATE PREPARE getCountrySql;
+	IF(NUM_UPDATE>0) THEN
+		SET @sql= CONCAT('update P_',Gr,' set  num=(
+		SELECT @number_:= @number_ + 1 FROM
+		(SELECT @number_:= 0) as tbl);');
+		PREPARE getCountrySql FROM @sql;
+		EXECUTE getCountrySql;
+		DEALLOCATE PREPARE getCountrySql;
+	END IF;
+	
 	SET @i=1;
 	SET @len=(select count(word) from prefix); 
 	WHILE @i<=@len DO
@@ -184,50 +196,66 @@ CREATE PROCEDURE deleteGlobalPredmet(IN Name VARCHAR(100) CHARACTER SET utf8)
     COMMENT 'Удалит предмет'
 BEGIN
 	SET @i=1;
-	SET @len=(select max(id) from группы);
+	SET @len=(select max(num) from группы);
 	WHILE @i<=@len DO
-		SET @sql= CONCAT('CALL deletePredmet(',
-		(select Имя from группы where num=@i),');');
-		PREPARE getCountrySql FROM @sql;
-		EXECUTE getCountrySql;
-		DEALLOCATE PREPARE getCountrySql;
+		SET @sq= CONCAT('CALL deletePredmet("',Name,'","',
+		(select Имя from группы where num=@i),'",1);');
+		PREPARE getCountrySq FROM @sq;
+		EXECUTE getCountrySq;
+		DEALLOCATE PREPARE getCountrySq;
 		SET @i=@i+1;
 	END WHILE;
-	SET @sql= CONCAT('DELETE FROM предметы 
-	where Наименование=',Name,');');
-	PREPARE getCountrySql FROM @sql;
-	EXECUTE getCountrySql;
-	DEALLOCATE PREPARE getCountrySql;
+	SET @sq= CONCAT('DELETE FROM предметы 
+	where Наименование="',Name,'";');
+	PREPARE getCountrySq FROM @sq;
+	EXECUTE getCountrySq;
+	DEALLOCATE PREPARE getCountrySq;
 	update предметы set  num=(
 	SELECT @number_:= @number_ + 1 FROM
 	(SELECT @number_:= 0) as tbl);			
 END |
 DELIMITER ;
 
-
 DELIMITER |
-
 CREATE PROCEDURE deletePredmet(IN Name VARCHAR(100) CHARACTER SET utf8,
-IN Gr VARCHAR(100) CHARACTER SET utf8)
-	NOT DETERMINISTIC
+IN Gr VARCHAR(100) CHARACTER SET utf8,IN NUM_UPDATE INT)
+        NOT DETERMINISTIC
     SQL SECURITY INVOKER
-    COMMENT 'Удалит предмет группе'
+    COMMENT 'Удалит предмет группе' 
+
 BEGIN
-	SET @i=1;
-	SET @len=(select count(word) from prefix);
-	WHILE @i<=@len DO
-		SET @sql= CONCAT('DROP TABLE ',(select word from
-		prefix where id=@i),Name,Gr,';');
-		PREPARE getCountrySql FROM @sql;
-		EXECUTE getCountrySql;
-		DEALLOCATE PREPARE getCountrySql;
-		SET @i=@i+1;
-	END WHILE;
-	SET @sql= CONCAT('DELETE FROM P_',Gr,
-	' where предмет=',name);
-		PREPARE getCountrySql FROM @sql;
-		EXECUTE getCountrySql;
-		DEALLOCATE PREPARE getCountrySql;
+	SET @temp=0;
+	SET @sql= CONCAT('select count(предмет) INTO @temp from P_',Gr,';');
+	PREPARE getCountryS FROM @sql;
+	EXECUTE getCountryS;
+	DEALLOCATE PREPARE getCountryS;
+
+	IF(@temp>=1) THEN
+        SET @j=1;
+        SET @le=(select count(word) from prefix);
+        WHILE @j<=@le DO
+                SET @sql= CONCAT('DROP TABLE ',(select word from
+                prefix where id=@j),Name,Gr,';');
+                PREPARE getCountryS FROM @sql;
+                EXECUTE getCountryS;
+                DEALLOCATE PREPARE getCountryS;
+                SET @j=@j+1;
+        END WHILE;
+        SET @sql= CONCAT('DELETE FROM P_',Gr,
+        ' where предмет="',name,'";');
+                PREPARE getCountryS FROM @sql;
+                EXECUTE getCountryS;
+                DEALLOCATE PREPARE getCountryS;
+        IF(NUM_UPDATE>0) THEN
+        	SET @sql= CONCAT('update P_',Gr,' set  num=(
+			SELECT @number_:= @number_ + 1 FROM
+			(SELECT @number_:= 0) as tbl);');
+			PREPARE getCountryS FROM @sql;
+			EXECUTE getCountryS;
+			DEALLOCATE PREPARE getCountryS;
+        END IF;
+END IF;
+
 END|
 DELIMITER ;
 
@@ -270,20 +298,38 @@ CREATE PROCEDURE deleteGroup(IN Name VARCHAR(100) CHARACTER SET utf8)
 	SQL SECURITY INVOKER
 	COMMENT 'удалит группу'
 BEGIN 
-	SET @sql= CONCAT('DROP TABLE ',Name,';');
+	
+	SET @i=1;
+    SET @len=0;
+    SET @sql= CONCAT('select count(предмет) INTO @len from  P_',Name,';');
 	PREPARE getCountrySql FROM @sql;
 	EXECUTE getCountrySql;
 	DEALLOCATE PREPARE getCountrySql;
 	
-	SET @sql= CONCAT('SELECT deletePredmet(предмет) from P_',Name,';');
-	PREPARE getCountrySql FROM @sql;
-	EXECUTE getCountrySql;
-	DEALLOCATE PREPARE getCountrySql;
+    WHILE @i<=@len DO
+    	SET @temp="";
+    	SET @sql= CONCAT('select предмет INTO @temp from P_',Name,' where num=@i;');
+		PREPARE getCountrySql FROM @sql;
+		EXECUTE getCountrySql;
+		DEALLOCATE PREPARE getCountrySql;
+    	
+		SET @sql= CONCAT('call deletePredmet("',@temp,'","',Name,'",0");');
+		PREPARE getCountrySql FROM @sql;
+		EXECUTE getCountrySql;
+		DEALLOCATE PREPARE getCountrySql;
+		SET @i=@i+1;
+	END WHILE;
 	
 	SET @sql= CONCAT('DROP TABLE P_',Name,';');
 	PREPARE getCountrySql FROM @sql;
 	EXECUTE getCountrySql;
 	DEALLOCATE PREPARE getCountrySql;
+	
+	SET @sql= CONCAT('DROP TABLE ',Name,';');
+	PREPARE getCountrySql FROM @sql;
+	EXECUTE getCountrySql;
+	DEALLOCATE PREPARE getCountrySql;
+	
 	
 	SET @sql= CONCAT('DELETE FROM группы WHERE Имя="',Name,'";');
 	PREPARE getCountrySql FROM @sql;

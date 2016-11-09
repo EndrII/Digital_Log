@@ -44,4 +44,20 @@
 #define NEW_PREDMET_TITLE 41
 #define NEW_PREDMET_ABOUT 42
 #define PREDMET_EDITOR 43
+#define USER_LOGIN 44
+#define USER_PASSS 45
+#define USER_HOST 46
+#define USER_PORT 47
+#define BUTTON_DEFAULT 48
+#define DATABASE_SETTINGS 49
+#define CHANGE 50
+#define CHANGE_ABOUT 51
+#define PROPERTY 52
+#define VALUE 53
+#define GROUP_MG 54
+#define ONLINE 55
+#define OFFLINE 56
+#define STOPED 57
+#define RECONNECT 58
+
 #endif // LANGUAGEINDEX_H

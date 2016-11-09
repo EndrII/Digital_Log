@@ -80,7 +80,6 @@ void PredmeMenager::createContextMenu(){
     renamePredmet=new QAction(ELanguage::getWord(BUTTON_RENAME));
     renamePredmet->setStatusTip(ELanguage::getWord(RENAME_PREDMET_MSG));
     connect(renamePredmet,SIGNAL(triggered(bool)),this,SLOT(Renam(bool)));
-
 }
 void PredmeMenager::dell(bool){
     if(!QMessageBox::question(this,ELanguage::getWord(WARNING),
@@ -106,5 +105,7 @@ PredmeMenager::~PredmeMenager(){
     delete modelL;
     delete querR;
     delete modelR;
+    delete deletePredmet;
+    delete renamePredmet;
 }
 

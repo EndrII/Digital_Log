@@ -10,6 +10,7 @@ QString ELanguage::getWord(const unsigned int &index,const QString&patch)
     QString result="";
     if(f.open(QIODevice::ReadOnly)){
         QTextStream stream(&f);
+        stream.setCodec("UTF8");
         QChar temp;unsigned int indexTemp=0;
         while(index>indexTemp&&!stream.atEnd())
         {

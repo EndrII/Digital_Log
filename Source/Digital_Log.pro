@@ -13,7 +13,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.3.3
+VERSION = 1.0.4.0
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog
@@ -26,7 +26,6 @@ SOURCES += main.cpp\
     EError.cpp \
     starastamode.cpp \
     groupmenager.cpp \
-    setings.cpp \
     datewidget.cpp \
     readarchiv.cpp \
     about.cpp \
@@ -40,14 +39,14 @@ SOURCES += main.cpp\
     SpaceEngineComponents/System/ELanguage.cpp \
     sourcetable.cpp \
     DataBasesMenager.cpp \
-    PredmeMenager.cpp
+    PredmeMenager.cpp \
+    settings.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
     EError.h \
     starastamode.h \
     groupmenager.h \
-    setings.h \
     datewidget.h \
     readarchiv.h \
     about.h \
@@ -62,7 +61,8 @@ HEADERS  += mainwindow.h \
     sourcetable.h \
     languageindex.h \
     DataBasesMenager.h \
-    PredmeMenager.h
+    PredmeMenager.h \
+    settings.h
 
 FORMS +=
 

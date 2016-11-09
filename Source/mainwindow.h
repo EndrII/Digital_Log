@@ -26,60 +26,34 @@
 #include "groupmenager.h"
 #include "DataBasesMenager.h"
 #include "readarchiv.h"
-#include "setings.h"
+#include "settings.h"
 #include "about.h"
 #include <QDebug>
 #include "help.h"
-//#include <QRadioButton>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
     GroupMenager *grm;
-
-    QString tempPatch;
+    settings conf;
     sqlDataBase *bd;
     StarastaMode *MS;
     QTabWidget *tab;
-    Setings *st;
     QLabel *state;
     QTextEdit *LogPanel;
-    QAction *arh,*openarh,*sv,*star,*mset,*bases,*grs,*crea,*closeA;
-    void createGroupMenu();
-    void createDataBaseMenu();
-    void CreateLogMenu();
-    void createFileMenu();
-    void CreateMenu();
-    void CreateInterface();
+    QAction *mset,*bases,*grs,*connect_m,*closeA;
+    void createMenu();
 private slots:
     void Error(int,QString);
-    void DataBaseCreated(QString);
-    void addFilter(bool);
-    void clearFilter(bool);
-    void Save(bool);
+    void stateChanged(state_BD);
     void about(bool);
     void help(bool);
     void setings(bool);
-    void AchiveOk(QString);
-    //void StateBDChanged(StateDataBase stat);
-   // void Grmclosed(QObject*);
-    //void GroupChanged(Group*);
-    //void GroupOpened(GroupVoid*);
-    //void GroupCreated(Group*);
-    //void controlGroupCreated(GroupVoid*);
-    //void ControlGroupDeleted(Group*);
-    void start(bool);
-    void CreateDataBase(bool);
-    void OpenDB(bool);
+    //void AchiveOk(QString);
+    void connect_bd(bool);
     void Exit(bool);
     void BASES(bool);
     void GRM(bool);
-    void toArhiv(bool);
-    void closeArhiv(bool);
-    void arhive(bool);
-    void closeEvent(QCloseEvent *);
-  //  void modeStarasta();
- //   void modePrepod();
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();

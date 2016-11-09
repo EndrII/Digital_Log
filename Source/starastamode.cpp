@@ -81,7 +81,7 @@ void StarastaMode::BDOpened(QString){
 /*void StarastaMode::GroupDeleted(QString){
     //ComboWrite(groups);
 }*/
-void StarastaMode::GroupListChanged(int gr){
+void StarastaMode::GroupListChanged(int){
     /*change->setEnabled(false);
     TableDisconnect();
     table->clear();
@@ -122,39 +122,6 @@ void StarastaMode::Editing(){
     thisGroup->setSavedState(Saved);
      this->RedrawLite(thisVoidGroup);*/
 }
-/*void StarastaMode::StateChanged(StateDataBase st){
-    /*switch (st) {
-    case notOpened:
-        add->setEnabled(false);
-        change->setEnabled(false);
-        remove->setEnabled(false);
-        groups->setEnabled(false);
-        break;
-    case Arhive:
-        add->setEnabled(false);
-        change->setEnabled(false);
-        remove->setEnabled(false);
-        groups->setEnabled(true);
-        break;
-    case notStarted:
-        add->setEnabled(false);
-        change->setEnabled(false);
-        remove->setEnabled(false);
-        groups->setEnabled(false);
-        break;
-    case Started:
-        add->setEnabled(groups->count()>0);
-        //change->setEnabled(true);
-        remove->setEnabled(groups->count()>0);
-        groups->setEnabled(true);
-        break;
-    default:
-        break;
-    }
-}*/
-/*void StarastaMode::print(QTableWidget *Table, QString patch){
-
-}*/
 void StarastaMode::createContextMenu(){
     clearFilter=new QAction("Очистить фильтры");
     clearFilter->setStatusTip("Удалит все фильтры из таблицы");
