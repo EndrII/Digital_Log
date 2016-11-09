@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(temp);
     this->setCentralWidget(widget);
     connect(bd,SIGNAL(Message(int,QString)),this,SLOT(Error(int,QString)));
-    connect(bd,SIGNAL(Message(int,QString)),this,SLOT(Error(int,QString)));
+    connect(bd,SIGNAL(stateChanged(state_BD)),this,SLOT(stateChanged(state_BD)));
 
     createMenu();
 }
