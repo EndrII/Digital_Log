@@ -14,113 +14,53 @@
 StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
 {
     bd=bd_;
-    groups=new QComboBox(this);
-    add=new QPushButton("Начать отчет",this);
-    add->setToolTip("Начать вести отчет для выбранной группы");
-    change=new QPushButton("Изменить лимит пропусков",this);
-    change->setToolTip("Изменить предел количества пропусков");
-    remove=new QPushButton("удалить отчет",this);
-    remove->setToolTip("прекратить вести отчеты для выбранной группы");
-    table=new QTableWidget(this);
-    groups->setGeometry(interval,interval,Bwidth,Bheight);
-    add->setGeometry(1*(interval+Bwidth),interval,Bwidth,Bheight);
-    change->setGeometry(2*(interval+Bwidth),interval,Bwidth,Bheight);
-    remove->setGeometry(3*(interval+Bwidth),interval,Bwidth,Bheight);
-    table->setGeometry(interval,2*interval+Bheight,Bwidth,Bheight);
+    groups=new QComboBox();
+    times=new QComboBox();
+    print_=new QPushButton(ELanguage::getWord(PRINT));
+    print_->setShortcut(Qt::Key_Print);
+    change=new QPushButton(ELanguage::getWord(LIMIT));
+    table=new QTableView(this);
+    qyer=bd->registration();
+    model=new QSqlQueryModel();
+    model->setQuery(*qyer);
+    table->setModel(model);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->setMinimumSize(800,480);
     change->setEnabled(false);
     createContextMenu();
-    connect(add,SIGNAL(clicked(bool)),this,SLOT(addClick()));
+    QVBoxLayout *box=new QVBoxLayout();
+    QHBoxLayout *list=new QHBoxLayout();
+    list->addWidget(groups);
+    list->addWidget(times);
+    list->addWidget(print_);
+    list->addWidget(change);
+    box->addLayout(list);
+    box->addWidget(table);
+    this->setLayout(box);
+    connect(bd,SIGNAL(stateChanged(state_BD)),this,SLOT(updateGroups(state_BD)));
+    connect(print_,SIGNAL(clicked(bool)),this,SLOT(PrintClick()));
     connect(change,SIGNAL(clicked(bool)),this,SLOT(changeClick()));
-    connect(remove,SIGNAL(clicked(bool)),this,SLOT(removeClick()));
+    connect(times,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
     connect(groups,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
 }
-void StarastaMode::resizeEvent(QResizeEvent *){
-    table->setGeometry(interval,2*interval+Bheight,this->width()*0.95,this->height()*0.9);
+void StarastaMode::updateGroups(state_BD){
+    ComboWrite();
 }
-void StarastaMode::addClick(){
-    //bd->createControlGroup(thisGroup);
+void StarastaMode::PrintClick(){
 }
 void StarastaMode::changeClick(){
-    /*if(bd->security()){
-        thisVoidGroup->setLim(QInputDialog::getInt(this,"Лимит поличество пропусков","текущее максимально доапустимое количество пропусков",thisVoidGroup->getLim(true),0));
-        RedrawLite(thisVoidGroup);
-    }*/
 }
-void StarastaMode::removeClick(){
-    /*if(bd->getPass()!=""){
-        if(bd->getPass()==QInputDialog::getText(this,"Безопасность","Введите пароль безопасности для входа в настройки базы данных")){
-            QMessageBox::StandardButton temp;
-            temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
-                                          QMessageBox::Yes|QMessageBox::No);
-            if(temp==QMessageBox::Yes){
-                if(bd->deleteControlGroup(thisGroup)){
-                    change->setEnabled(false);
-                    this->Redraw(thisVoidGroup);
-                }
-            }
-
-        }else{
-            QMessageBox::information(this,"Безопасность","Введен не верный пароль!");
-        }
-    }else{
-        QMessageBox::StandardButton temp;
-        temp = QMessageBox::question(this, "Удаление","Удалить группу "+thisGroup->getName()+" ?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if(temp==QMessageBox::Yes){
-            if(bd->deleteControlGroup(thisGroup)){
-                change->setEnabled(false);
-                this->Redraw(thisVoidGroup);
-            }
-        }
-    }*/
-}
-void StarastaMode::BDOpened(QString){
-    //ComboWrite(groups);
-}
-/*void StarastaMode::GroupDeleted(QString){
-    //ComboWrite(groups);
-}*/
 void StarastaMode::GroupListChanged(int){
-    /*change->setEnabled(false);
-    TableDisconnect();
-    table->clear();
-    table->setColumnCount(0);
-    table->setRowCount(0);
-    if(gr==-1) return;
-    BPair TempGr=(*bd->getDataList())[gr];
-    bd->openGroup(TempGr.first->getName());*/
 }
-void StarastaMode::ComboWrite(QComboBox *combo){
-    /*groups->clear();
-    for(BPair p:*bd->getDataList()){
-        combo->addItem(p.first->getName());
-    }
-    if(groups->count()>0&&bd->getState()==Started){
-        add->setEnabled(true);
-        remove->setEnabled(true);
-        if(thisVoidGroup!=NULL)Redraw(thisVoidGroup);
-    }else{
-        add->setEnabled(false);
-        remove->setEnabled(false);
-    }*/
+void StarastaMode::ComboWrite(){
+    times->clear();
+    groups->clear();
+    times->addItems(bd->getDateListU());
+    groups->addItems(bd->getGroupList());
 }
-void StarastaMode::TableDisconnect(){
-    /*for(int j=0;j<table->rowCount();j++){
-        if(table->columnCount()>0)
-            disconnect(table->cellWidget(j,table->columnCount()-2));
-        }*/
-}
-/*void StarastaMode::GroupSaved(GroupVoid *){
-}*/
+
 void StarastaMode::Editing(){
-   /* if(bd->getState()!=Started) return;
-    for(int i=0;i<table->rowCount();i++){
-        thisVoidGroup->ChangeTopElement(indexs[i],((QLineEdit*)table->cellWidget(i,table->columnCount()-2))->text().toUInt());
-    }
-    thisVoidGroup->resetSumm();
-    thisGroup->setSavedState(Saved);
-     this->RedrawLite(thisVoidGroup);*/
+
 }
 void StarastaMode::createContextMenu(){
     clearFilter=new QAction("Очистить фильтры");
@@ -157,189 +97,21 @@ void StarastaMode::createContextMenu(){
 
 }
 void StarastaMode::ClickOnlySumm(bool){
-    /*bool* temp= thisVoidGroup->getKolendar();
-    for(int i=0;i<12;i++)
-        temp[i]=false;
-    this->Redraw(thisVoidGroup);
-*/
 }
 void StarastaMode::ClickPrintPDF(bool){
-  //  Printer::printPDF(this->table,thisVoidGroup->getLastReport(),QFileDialog::getSaveFileName(this,"Создание отчёта в PDF","./","*.pdf"));
 }
 void StarastaMode::ClickPrintHTML(bool){
-    //Printer::printHtml(this->table,thisVoidGroup->getLastReport(),QFileDialog::getSaveFileName(this,"Создание отчёта в HTML","./","*.html"));
 }
 void StarastaMode::clearFilterClick(bool){
-    /*indexPush(thisVoidGroup);
-    bool* temp= thisVoidGroup->getKolendar();
-    for(int i=0;i<12;i++)
-        temp[i]=true;
-    this->Redraw(thisVoidGroup);*/
 }
 void StarastaMode::alfavitClick(bool){
-    /*QStringList s=thisVoidGroup->getColumsHeader();
-    bool Switcher=true;
-    int siz=s.size();
-    while(Switcher&&siz){
-        Switcher=false;
-        for(int i=1;i<siz;i++){
-            if(s[indexs[i]].compare(s[indexs[i-1]],Qt::CaseInsensitive)<0){
-                Switcher=true;
-                unsigned int temp= indexs[i];
-                indexs[i]=indexs[i-1];
-                indexs[i-1]=temp;
-            }
-        }
-        siz--;
-    }
-    this->Redraw(thisVoidGroup);*/
 }
 void StarastaMode::maxtominClick(bool){
-   /* QStringList s=thisVoidGroup->getColumsHeader();
-    bool Switcher=true;
-    int siz=s.size();
-    while(Switcher&&siz){
-        Switcher=false;
-        for(int i=1;i<siz;i++){
-            if(tableSumWidget(i)>tableSumWidget(i-1)){
-              //  QString::toInt();
-                Switcher=true;
-                unsigned int temp= indexs[i];
-                indexs[i]=indexs[i-1];
-                indexs[i-1]=temp;
-            }
-        }
-        siz--;
-    }
-    this->Redraw(thisVoidGroup);*/
 }
 void StarastaMode::mintomaxClick(bool){
-    /*QStringList s=thisVoidGroup->getColumsHeader();
-    bool Switcher=true;
-    int siz=s.size();
-    while(Switcher&&siz){
-        Switcher=false;
-        for(int i=1;i<siz;i++){
-            if(tableSumWidget(i)<tableSumWidget(i-1)){
-              //  QString::toInt();
-                Switcher=true;
-                unsigned int temp= indexs[i];
-                indexs[i]=indexs[i-1];
-                indexs[i-1]=temp;
-            }
-        }
-        siz--;
-    }
-    this->Redraw(thisVoidGroup);*/
 }
 void StarastaMode::curentTimeClick(bool){
-    /*MounthDialog mou(thisVoidGroup->getKolendar(),this);
-    mou.exec();
-    this->Redraw(thisVoidGroup);*/
 }
-/*void StarastaMode::GroupChanged(Group *){
-}*/
-/*void StarastaMode::indexPush(GroupVoid *gr){
-    indexs.clear();
-    for(int i=0;i<gr->getColumsHeader().size();i++)
-        indexs.push_back(i);
-}*/
-/*void StarastaMode::ControlGroupChanged(GroupVoid *gr){
-    if(thisVoidGroup==gr){
-        indexPush(gr);
-        Redraw(thisVoidGroup);
-    }
-}*/
-/*void StarastaMode::GroupOpened(GroupVoid *gr){
-    indexPush(gr);
-    Redraw(gr);
-    connect(gr,SIGNAL(Changed(GroupVoid*)),this,SLOT(ControlGroupChanged(GroupVoid *)));
-    thisGroup->setSavedState(Saved);
-    change->setEnabled(true);
-}*/
-/*void StarastaMode::GroupCreated(Group *){
-    ComboWrite(groups);
-}*/
-/*void StarastaMode::controlGroupCreated(GroupVoid *gr){
-    GroupOpened(gr);
-    gr->setLim(QInputDialog::getInt(this,"Создание отчета","введите лимит пропусков для группы "+gr->getName(),bd->getLastPropusk()));
-    change->setEnabled(true);
-}*/
-/*void StarastaMode::Redraw(GroupVoid *gr){
-    table->clear();
-    if(gr==NULL)
-    {
-        table->setRowCount(0);
-        table->setColumnCount(0);
-    }else{
-        gr->resetSumm();
-        QList<QString> tempRow=gr->getColumsHeader();
-        QList<QString> tempCol=gr->getRowsHeader();
-        table->setRowCount(tempRow.size());
-        table->setColumnCount(gr->getGotWeek()+1);
-        for(int i=0;i<tempRow.size();i++){
-
-            table->setVerticalHeaderItem(i,new QTableWidgetItem(tempRow[indexs[i]]));
-            int tempIndex=0;
-            for(int j=0;j<tempCol.size();j++){
-                if(gr->isdrawColumn(j)) continue;
-                if(i==0)table->setHorizontalHeaderItem(tempIndex,new QTableWidgetItem(tempCol[j]));
-                if(j!=tempCol.size()-1||bd->isEnd()){
-                    table->setCellWidget(i,tempIndex,new QLabel(QString::number(gr->getItem(j,indexs[i]))));
-                    table->cellWidget(i,tempIndex)->setStyleSheet("background-color:  #F0FFFF");
-                    if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
-                        table->cellWidget(i,tempIndex)->setStyleSheet("background-color: yellow");
-                    if((*gr)[indexs[i]]>(ui)gr->getLim())
-                        table->cellWidget(i,tempIndex)->setStyleSheet("background-color: #ff4500");
-                }
-                else{
-                    table->setCellWidget(i,tempIndex,new QLineEdit(QString::number(gr->getItem(j,indexs[i]))));
-                    connect((QLineEdit*)table->cellWidget(i,tempIndex),SIGNAL(editingFinished()),this,SLOT(Editing()));
-                }
-                    //table->horizontalHeader()
-                tempIndex++;
-            }
-        }
-        table->setHorizontalHeaderItem(table->columnCount()-1,new QTableWidgetItem("Сумма"));
-        for(int i=0;i<gr->size();i++){
-            table->setCellWidget(i,table->columnCount()-1,new QLabel(QString::number((*gr)[indexs[i]])));
-            table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color:  #F0FFFF");
-            if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
-                table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: yellow");
-            if((*gr)[indexs[i]]>(ui)gr->getLim())
-                table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: #ff4500");
-        }
-    }
-
-}*/
-/*void StarastaMode::RedrawLite(GroupVoid *gr){
-        QList<QString> tempRow=gr->getColumsHeader();
-        QList<QString> tempCol=gr->getRowsHeader();
-        for(int i=0;i<tempRow.size();i++){
-            for(int j=0;j<gr->getGotWeek();j++){
-                if(gr->isdrawColumn(j)) continue;
-                if(j!=tempCol.size()-1||bd->isEnd()){
-                    table->cellWidget(i,j)->setStyleSheet("background-color:  #F0FFFF");
-                    if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
-                        table->cellWidget(i,j)->setStyleSheet("background-color: yellow");
-                    if((*gr)[indexs[i]]>(ui)gr->getLim())
-                        table->cellWidget(i,j)->setStyleSheet("background-color: #ff4500");
-                }
-                else{
-                    ((QLineEdit*)table->cellWidget(i,j))->setText(QString::number(gr->getItem(j,indexs[i])));
-                }
-            }
-        }
-        table->setHorizontalHeaderItem(table->columnCount()-1,new QTableWidgetItem("Сумма"));
-        for(int i=0;i<gr->size();i++){
-            ((QLabel*)table->cellWidget(i,table->columnCount()-1))->setText(QString::number((*gr)[indexs[i]]));
-            table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color:  #F0FFFF");
-            if((*gr)[indexs[i]]>(ui)gr->getLim()/2)
-                table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: yellow");
-            if((*gr)[indexs[i]]>(ui)gr->getLim())
-                table->cellWidget(i,table->columnCount()-1)->setStyleSheet("background-color: #ff4500");
-        }
-}*/
 
 void StarastaMode::contextMenuEvent(QContextMenuEvent *event){
     if(change->isEnabled()){

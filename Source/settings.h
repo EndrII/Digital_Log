@@ -20,13 +20,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include <QInputDialog>
-#include <QTableView>
 #include <QFileDialog>
 #include <QFile>
 #include <QDataStream>
-#include <QContextMenuEvent>
-#include <QHeaderView>
 #include <QAction>
 #include <QMenu>
 #include "datewidget.h"
@@ -52,26 +48,17 @@ class Settings : public QDialog
 private:
     settings conf;
     sqlDataBase *Bd;
-    QSqlQuery *quer;
-    QSqlQueryModel *model;
     QPushButton *complit,*default_,*cancle;
-    QTableView *table;
     QLineEdit *Login,*pass,*host,*port;
-    void createContextMenu();
-    void update();
-    QAction *change_;
 protected:
     static void writeConf(settings* conf,const QString& patch=defaultPatchFromConfFile);
 private slots:
-    void contextMenuEvent(QContextMenuEvent *event);
     void complitClick(bool);
     void defaultClick(bool);
     void cancleClick(bool);
-    void change(bool);
 public:
     explicit Settings(sqlDataBase *bd,QWidget *parent = 0);
     static settings readConf(const QString& patch=defaultPatchFromConfFile);
-
     ~Settings();
 signals:
 

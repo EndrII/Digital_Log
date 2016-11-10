@@ -59,5 +59,7 @@
 #define OFFLINE 56
 #define STOPED 57
 #define RECONNECT 58
+#define PRINT 59
+#define LIMIT 60
 
 #endif // LANGUAGEINDEX_H

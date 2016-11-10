@@ -13,6 +13,7 @@ class sqlDataBase:public QObject, protected QSqlDatabase{
 private:
     QStringList tempList;
     QSqlQuery *qer;
+    state_BD state;
     QSqlQueryModel *model;
 private slots:
 protected:
@@ -22,6 +23,7 @@ protected:
 public:
     explicit sqlDataBase();
     QSqlQuery* registration();
+    state_BD GetState();
     void connect_to(const QString&user="", const QString&pass="", const QString &host="",const QString& port="");
     void openDB(const QString &BaseName);
     void createGroup(const QString &GroupName);
@@ -31,17 +33,17 @@ public:
     void removePredmetGroup(const QString&gr,const QString&pred);
     void deleteGrpoup(const QString& name);
     void deletePredmet(const QString& name);
-   // void registration(QSqlQuery*quer,QSqlQueryModel *model);
     void deleteStudent(const QString &group, const QString name);
     QSqlQueryModel* getModel()const;
     QStringList& getGroupList();
+    QStringList& getDateListP();//propuski
+    QStringList& getDateListU();//uspevaimost
+
     void Query(const QString&);
     bool Query_no_update(const QString&);
-    //bool showDataBases();
     void addStudent(const QString& group,const QString name);
     bool createTruancy(const QString& GroupName);
     bool removeTruancy(const QString& GroupNmae);
-    //QSqlQueryModel* get
     ~sqlDataBase();
 
 signals:

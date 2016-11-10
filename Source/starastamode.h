@@ -11,7 +11,7 @@
 ****************************************************************************/
 #ifndef STARASTAMODE_H
 #define STARASTAMODE_H
-#include <QTableWidget>
+#include <QTableView>
 #include <QPushButton>
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -26,37 +26,31 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QHeaderView>
 #include "MounthDialog.h"
 #include "Printer.h"
-#define Bheight 20
-#define Bwidth 190
-#define interval 10
-//#define thisGroup ((*bd->getDataList())[groups->currentIndex()].first)
-//#define thisVoidGroup ((*bd->getDataList())[groups->currentIndex()].second)
-//#define tableSumWidget(i) (*thisVoidGroup)[indexs[i]]
 
 class StarastaMode : public QWidget
 {
     Q_OBJECT
 private:
-    void ComboWrite(QComboBox*);
-//    void indexPush(GroupVoid *gr);
-    //int oldIndex;
-    QVector<unsigned short> indexs;
+    void ComboWrite();
     sqlDataBase *bd;
+    QSqlQuery *qyer;
+    QSqlQueryModel *model;
+    QComboBox *groups;
+    QComboBox *times;
+    QPushButton *print_;
+    QPushButton *change;
+    //QPushButton *remove;
+    QTableView *table;
     QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime,*PrintHTML,*PrintPDF,*onlySumm;
     void createContextMenu();
-    void TableDisconnect();
 public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
-    QComboBox *groups;
-    QPushButton *add;
-    QPushButton *change;
-    QPushButton *remove;
-    QTableWidget *table;
-  //  static void print(QTableWidget *Table,QString patch="./");
     ~StarastaMode();
 private slots:
+    void updateGroups(state_BD);
     void clearFilterClick(bool);
     void alfavitClick(bool);
     void maxtominClick(bool);
@@ -65,28 +59,16 @@ private slots:
     void ClickPrintHTML(bool);
     void ClickPrintPDF(bool);
     void ClickOnlySumm(bool);
-    void addClick();
+    void PrintClick();
     void changeClick();
-    void removeClick();
+   // void removeClick();
     void GroupListChanged(int);
 protected slots:
-    void resizeEvent(QResizeEvent*);
     void contextMenuEvent(QContextMenuEvent *event);
 signals:
 public slots:
-//    void StateChanged(StateDataBase st);
     void Editing();
-//    void GroupChanged(Group*);
-    void BDOpened(QString);
-/*    void GroupSaved(GroupVoid*);
-    void GroupOpened(GroupVoid*);
-    void controlGroupCreated(GroupVoid*);
-    void ControlGroupChanged(GroupVoid*);
-    void GroupCreated(Group*);
-    void GroupDeleted(QString gr);
-    void Redraw(GroupVoid*);
-    void RedrawLite(GroupVoid*);
-*/
+    //void BDOpened(QString);
 };
 
 #endif // STARASTAMODE_H

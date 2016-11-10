@@ -313,7 +313,7 @@ BEGIN
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;
     	
-		SET @sql= CONCAT('call deletePredmet("',@temp,'","',Name,'",0");');
+		SET @sql= CONCAT('call deletePredmet("',@temp,'","',Name,'",0);');
 		PREPARE getCountrySql FROM @sql;
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;

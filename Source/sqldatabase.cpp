@@ -16,10 +16,15 @@ void sqlDataBase::connect_to(const QString &user, const QString &pass, const QSt
     }
     int op= open();
     qer->exec("select flag from config_flags where id=1;");
-    emit stateChanged((state_BD)(op+qer->value(0).toInt()));
+    state_BD temp=(state_BD)(op+qer->value(0).toInt());
+    if(temp!=state)
+        emit stateChanged(state=temp);
 }
 QSqlQuery* sqlDataBase::registration(){
     return new QSqlQuery(*this);
+}
+state_BD sqlDataBase::GetState(){
+    return state;
 }
 void sqlDataBase::error_msg(){
     if(!this->isOpen()){
@@ -69,6 +74,27 @@ QStringList& sqlDataBase::getGroupList(){
     }
     return tempList;
 }
+QStringList& sqlDataBase::getDateListU(){
+    if(!qer->exec("select Даты from времяУроки")){
+        error_msg();
+    }
+    tempList.clear();
+    while(qer->next()){
+        tempList.push_back(qer->value(0).toString());
+    }
+    return tempList;
+}
+QStringList& sqlDataBase::getDateListP(){
+    if(!qer->exec("select Даты from времяПропуски")){
+        error_msg();
+    }
+    tempList.clear();
+    while(qer->next()){
+        tempList.push_back(qer->value(0).toString());
+    }
+    return tempList;
+}
+
 void sqlDataBase::Query(const QString &str){
     if(!qer->exec(str)){
         error_msg();

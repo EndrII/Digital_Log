@@ -44,41 +44,30 @@ Settings::Settings(sqlDataBase *bd, QWidget *parent):
     conf=Settings::readConf();
     this->setModal(true);
     QVBoxLayout *vbox=new QVBoxLayout();
-    QHBoxLayout *hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel(ELanguage::getWord(USER_LOGIN)));
+    QHBoxLayout *box=new QHBoxLayout();
+    QVBoxLayout *hboxr=new QVBoxLayout();
+    QVBoxLayout *hboxl=new QVBoxLayout();
+
+    hboxl->addWidget(new QLabel(ELanguage::getWord(USER_LOGIN)));
+    hboxl->addWidget(new QLabel(ELanguage::getWord(USER_PASSS)));
+    hboxl->addWidget(new QLabel(ELanguage::getWord(USER_HOST)));
+    hboxl->addWidget(new QLabel(ELanguage::getWord(USER_PORT)));
+
     Login=new QLineEdit(conf.user);
-    hbox->addWidget(Login);
-    vbox->addLayout(hbox);
-    hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel(ELanguage::getWord(USER_PASSS)));
+    hboxr->addWidget(Login);
+
     pass=new QLineEdit(conf.pass);
-    hbox->addWidget(pass);
-    vbox->addLayout(hbox);
-    createContextMenu();
+    pass->setEchoMode(QLineEdit::Password);
+    pass->setInputMethodHints(Qt::ImhHiddenText| Qt::ImhNoPredictiveText|Qt::ImhNoAutoUppercase);
+    hboxr->addWidget(pass);
 
-
-    hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel(ELanguage::getWord(USER_HOST)));
     host=new QLineEdit(conf.host);
-    hbox->addWidget(host);
-    vbox->addLayout(hbox);
-    hbox=new QHBoxLayout();
-    hbox->addWidget(new QLabel(ELanguage::getWord(USER_PORT)));
+    hboxr->addWidget(host);
+
     port=new QLineEdit(conf.port);
-    hbox->addWidget(port);
-    vbox->addLayout(hbox);
-    quer=Bd->registration();
-    model=new QSqlQueryModel();
-    table=new QTableView();
-    table->resizeColumnToContents(0);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    table->setColumnWidth(1,100);
+    hboxr->addWidget(port);
 
-    table->setModel(model);
-    vbox->addWidget(new QLabel(ELanguage::getWord(DATABASE_SETTINGS)));
-    vbox->addWidget(table);
-
-    hbox=new QHBoxLayout();
+    QHBoxLayout *hbox=new QHBoxLayout();
     cancle=new QPushButton(ELanguage::getWord(BUTTON_CANCLE));
     connect(cancle,SIGNAL(clicked(bool)),this,SLOT(cancleClick(bool)));
     hbox->addWidget(cancle);
@@ -90,12 +79,11 @@ Settings::Settings(sqlDataBase *bd, QWidget *parent):
     complit=new QPushButton(ELanguage::getWord(BUTTON_OK));
     connect(complit,SIGNAL(clicked(bool)),this,SLOT(complitClick(bool)));
     hbox->addWidget(complit);
+    box->addLayout(hboxl);
+    box->addLayout(hboxr);
+    vbox->addLayout(box);
     vbox->addLayout(hbox);
-
     this->setLayout(vbox);
-
-    update();
-
 }
 settings Settings::readConf(const QString &patch){
     QFile f(patch);
@@ -141,12 +129,12 @@ void Settings::defaultClick(bool){
                         "set flag=1 where id=2");
     Bd->Query_no_update("update config_flags "
                         "set flag=6 where id=3");
-    update();
+    //update();
 }
 void Settings::cancleClick(bool){
     this->close();
 }
-void Settings::update(){
+/*void Settings::update(){
     quer->exec("select Описание as '"+ELanguage::getWord(PROPERTY)+"',flag as'"+
                ELanguage::getWord(VALUE)+"' from  config_flags");
     model->setQuery(*quer);
@@ -158,7 +146,7 @@ void Settings::change(bool){
                                                               ELanguage::getWord(CHANGE_ABOUT)))+
                             " where flag="+table->model()->data(index).toString());
     }
-    update();
+    //update();
 }
 void Settings::createContextMenu(){
     change_=new QAction(ELanguage::getWord(CHANGE));
@@ -169,10 +157,7 @@ void Settings::contextMenuEvent(QContextMenuEvent *event){
     QMenu menu(this);
     menu.addAction(change_);
     menu.exec(event->globalPos());
-}
+}*/
 Settings::~Settings(){
-    delete quer;
-    delete model;
-    delete change_;
 }
 

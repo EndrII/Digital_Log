@@ -26,7 +26,6 @@ GroupMenager::GroupMenager(sqlDataBase *bd_, QWidget *parent) : QDialog(parent)
     ComboWrite();
     connect(cb,SIGNAL(activated(int)),this,SLOT(ComboChsnged(int)));
     this->setMinimumSize(640,480);
-    //save->setEnabled(false);
     connect(addU,SIGNAL(clicked(bool)),this,SLOT(addu()));
     connect(add,SIGNAL(clicked(bool)),this,SLOT(add_()));
     connect(dell,SIGNAL(clicked(bool)),this,SLOT(del()));
