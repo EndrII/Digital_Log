@@ -37,13 +37,13 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     box->addLayout(list);
     box->addWidget(table);
     this->setLayout(box);
-    connect(bd,SIGNAL(stateChanged(state_BD)),this,SLOT(updateGroups(state_BD)));
+    connect(bd,SIGNAL(ChangedBD()),this,SLOT(updateGroups()));
     connect(print_,SIGNAL(clicked(bool)),this,SLOT(PrintClick()));
     connect(change,SIGNAL(clicked(bool)),this,SLOT(changeClick()));
     connect(times,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
     connect(groups,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
 }
-void StarastaMode::updateGroups(state_BD){
+void StarastaMode::updateGroups(){
     ComboWrite();
 }
 void StarastaMode::PrintClick(){

@@ -50,7 +50,7 @@ public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
-    void updateGroups(state_BD);
+    void updateGroups();
     void clearFilterClick(bool);
     void alfavitClick(bool);
     void maxtominClick(bool);
