@@ -40,7 +40,10 @@ SOURCES += main.cpp\
     sourcetable.cpp \
     DataBasesMenager.cpp \
     PredmeMenager.cpp \
-    settings.cpp
+    settings.cpp \
+    PredmetMode.cpp \
+    DateEditor.cpp \
+    DateMaster.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -62,7 +65,10 @@ HEADERS  += mainwindow.h \
     languageindex.h \
     DataBasesMenager.h \
     PredmeMenager.h \
-    settings.h
+    settings.h \
+    PredmetMode.h \
+    DateEditor.h \
+    DateMaster.h
 
 FORMS +=
 

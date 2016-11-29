@@ -23,11 +23,13 @@
 #include <QTextEdit>
 #include <QTime>
 #include "starastamode.h"
+#include "PredmetMode.h"
 #include "groupmenager.h"
 #include "DataBasesMenager.h"
 #include "readarchiv.h"
 #include "settings.h"
 #include "about.h"
+#include "DateEditor.h"
 #include <QDebug>
 #include "help.h"
 class MainWindow : public QMainWindow
@@ -37,11 +39,13 @@ private:
     GroupMenager *grm;
     settings conf;
     sqlDataBase *bd;
+    PredmetMode *MP;
     StarastaMode *MS;
     QTabWidget *tab;
     QLabel *state;
     QTextEdit *LogPanel;
-    QAction *mset,*bases,*grs,*connect_m,*closeA;
+    QMenu *control;
+    QAction *mset,*bases,*grs,*connect_m,*closeA,*DateManager,*stop,*toArhive;
     void createMenu();
 private slots:
     void Error(int,QString);
@@ -49,6 +53,9 @@ private slots:
     void about(bool);
     void help(bool);
     void setings(bool);
+    void dateManager_(bool);
+    void stop_(bool);
+    void toArhiv(bool);
     //void AchiveOk(QString);
     void connect_bd(bool);
     void Exit(bool);

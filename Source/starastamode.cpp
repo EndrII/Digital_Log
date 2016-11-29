@@ -46,16 +46,41 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
 void StarastaMode::updateGroups(){
     ComboWrite();
 }
+void StarastaMode::keyPressEvent(QKeyEvent *event){
+    if(event->key()==Qt::Key_Return){
+        bool ok;
+        short indexRow=table->currentIndex().row();
+        QString tempName=model->data(model->index(indexRow,0)).toString();
+        int tempData=QInputDialog::getInt(this,ELanguage::getWord(ENTER_VALUE),ELanguage::getWord(ENTER_FROM)+
+                                          " "+tempName,
+                                          0,0,56,1,&ok);
+        if(ok){
+            QString temp_data;
+            qyer->exec("select Даты from времяПропуски");
+            qyer->seek(qyer->size()-1);
+            temp_data=qyer->value(0).toString().replace('-','_');
+            qyer->exec("UPDATE "+groups->currentText()+" SET "+temp_data+"="+QString::number(tempData)+" "
+                       "WHERE ФИО='"+tempName+"'");
+            qyer->exec("call showGroup('"+groups->currentText()+"')");
+            model->setQuery(*qyer);
+            table->selectRow(indexRow+1);
+        }
+    }
+}
 void StarastaMode::PrintClick(){
 }
 void StarastaMode::changeClick(){
 }
 void StarastaMode::GroupListChanged(int){
+    qyer->exec("call showGroup('"+groups->currentText()+"')");
+    model->setQuery(*qyer);
 }
 void StarastaMode::ComboWrite(){
     times->clear();
     groups->clear();
+
     times->addItems(bd->getDateListU());
+    groups->addItem("*");
     groups->addItems(bd->getGroupList());
 }
 

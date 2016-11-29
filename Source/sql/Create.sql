@@ -1,4 +1,4 @@
-/*version - 1.1.5*/
+/*version - 1.2.2*/
 
 
 create table config_flags(
@@ -51,31 +51,32 @@ PRIMARY KEY(Наименование)
 )ENGINE=InnoDB CHARACTER SET=UTF8;
 
 DELIMITER |
-CREATE PROCEDURE update_table (IN name VARCHAR(100),
-IN time VARCHAR(100))
+CREATE PROCEDURE update_table (IN name VARCHAR(100) CHARACTER SET utf8,
+IN tim VARCHAR(100) CHARACTER SET utf8)
     NOT DETERMINISTIC
     SQL SECURITY INVOKER
     COMMENT 'Обновит таблицу в ссотвецтвии 
     с текущими датами'
 BEGIN
-	DECLARE i INT DEFAULT (SELECT COUNT(*) FROM
-	information_schema.COLUMNS WHERE TABLE_NAME=name);
+                SET @i=(SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME=name);
 		SET @len=0;
 		SET @sql= CONCAT('select count(Даты) INTO @len from ',
-		time, ');');
+                tim,' where Даты<=NOW();');
 		PREPARE getCountrySql FROM @sql;
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;
-	WHILE i<=@len DO
-		SET @temp=(select DATE_FORMAT((select Даты from
-		времяПропуски WHERE времяПропуски.id=i),
-		'%d_%m_%Y'));
-		SET @sql= CONCAT('ALTER TABLE ',name,' ADD
-		',@temp,' int NOT NULL DEFAULT 0;');
+        WHILE @i<=@len DO
+                SET @temp=0;
+                SET @sql= CONCAT('select DATE_FORMAT((select Даты from ',
+                tim,' WHERE id=@i),"%Y_%m_%d") INTO @temp;');
+                PREPARE getCountrySql FROM @sql;
+                EXECUTE getCountrySql;
+                DEALLOCATE PREPARE getCountrySql;
+		SET @sql= CONCAT('ALTER TABLE ',name,' ADD ',@temp,' int NOT NULL DEFAULT 0;'); 
 		PREPARE getCountrySql FROM @sql;
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;
-		SET i=i+1;
+                SET @i=@i+1;
 	END WHILE;
 END|
 DELIMITER ;
@@ -174,7 +175,7 @@ BEGIN
 	WHILE @i<=@len DO
 		SET @sql= CONCAT('CREATE TABLE ',(select word from
 		prefix where id=@i),Name,Gr,'( 
-		ФИО VARCHAR(100) NOT NULL, 
+                ФИО VARCHAR(100) NOT NULL UNIQUE,
 		FOREIGN KEY(ФИО) REFERENCES ',Gr,'(ФИО)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE
@@ -183,6 +184,14 @@ BEGIN
 		PREPARE getCountrySql FROM @sql;
 		EXECUTE getCountrySql;
 		DEALLOCATE PREPARE getCountrySql;
+
+                SET @sql= CONCAT('INSERT INTO ',(select word from
+                prefix where id=@i),Name,Gr,'(ФИО) (select ФИО from ',Gr,')');
+                PREPARE getCountrySql FROM @sql;
+                EXECUTE getCountrySql;
+                DEALLOCATE PREPARE getCountrySql;
+
+
 		SET @i=@i+1;
 	END WHILE;	
 END|
@@ -423,7 +432,7 @@ create procedure startBd()
 	COMMENT 'запустит базу данных'
 BEGIN
 	SET @d=CURDATE();
-	IF(DAYOFMONTH(d)>28) THEN
+        IF(DAYOFMONTH(@d)>28) THEN
 		SET @d=@d-3;
 	END IF;
 	IF((select flag from config_flags where id=1)<>1) THEN
@@ -440,6 +449,10 @@ create procedure showGroup(IN name VARCHAR(100) CHARACTER SET UTF8)
 	SQL SECURITY INVOKER
 	COMMENT 'просмотр пропусков'
 BEGIN
+        SET @sq= CONCAT('CALL update_table("',name,'","времяПропуски");');
+        PREPARE getCountrySq FROM @sq;
+        EXECUTE getCountrySq;
+        DEALLOCATE PREPARE getCountrySq;
 	SET @sql= CONCAT('SELECT * FROM ',name,';');
 	PREPARE getCountrySql FROM @sql;
 	EXECUTE getCountrySql;
@@ -450,14 +463,14 @@ DELIMITER ;
 
 DELIMITER |
 create procedure showPredmet(IN name VARCHAR(100) CHARACTER SET UTF8,
-IN Gr VARCHAR(100) CHARACTER SET UTF8, IN date_ DATE )
+IN Gr VARCHAR(100) CHARACTER SET UTF8, IN date_ VARCHAR(100) )
 	NOT DETERMINISTIC
 	SQL SECURITY INVOKER
 	COMMENT 'просмотр пропусков'
 BEGIN
-	SET @sql= CONCAT('SELECT ',CAST(date_ AS CHAR),' FROM LC_',name,Gr,'PC_',name,Gr,'KRC_',name,Gr,
-	'RGRC_',name,Gr,'LD_',name,Gr,'KRD_',name,Gr,
-	'RGRD_',name,Gr);
+	SET @sql= CONCAT('SELECT ',date_,' FROM LC_',name,Gr,', PC_',name,Gr,', KRC_',name,Gr,
+	', RGRC_',name,Gr,', LD_',name,Gr,', KRD_',name,Gr,
+	', RGRD_',name,Gr);
 	PREPARE getCountrySql FROM @sql;
 	EXECUTE getCountrySql;
 	DEALLOCATE PREPARE getCountrySql;

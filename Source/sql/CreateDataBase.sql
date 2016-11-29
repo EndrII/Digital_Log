@@ -377,7 +377,7 @@ create procedure startBd()
 	COMMENT 'запустит базу данных'
 BEGIN
 	SET @d=CURDATE();
-	IF(DAYOFMONTH(d)>28) THEN
+        IF(DAYOFMONTH(@d)>28) THEN
 		SET @d=@d-3;
 	END IF;
 	IF((select flag from config_flags where id=1)<>1) THEN

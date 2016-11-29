@@ -33,7 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
     temp2->addWidget(tab);
     temp->addLayout(temp2);
     MS=new StarastaMode(bd,this);
-    tab->addTab(MS,"Староста");
+    MP=new PredmetMode(bd,this);
+    tab->addTab(MS,ELanguage::getWord(STEWARD_MOD));
+    tab->addTab(MP,ELanguage::getWord(PREDMET_MOD));
     QWidget *widget=new QWidget;
     widget->setLayout(temp);
     this->setCentralWidget(widget);
@@ -58,6 +60,20 @@ void MainWindow::createMenu(){
     mset=new QAction(ELanguage::getWord(DATABASE_SETTINGS),this);
     this->menuBar()->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
+
+    control=new QMenu(ELanguage::getWord(STATUS_CONTROL),this);
+    this->menuBar()->addMenu(control);
+    DateManager=new QAction(ELanguage::getWord(DATE_MENAGER),this);
+    control->addAction(DateManager);
+    connect(DateManager,SIGNAL(triggered(bool)),this,SLOT(dateManager_(bool)));
+
+    /*stop=new QAction(ELanguage::getWord(STOP),this);
+    control->addAction(stop);
+    connect(stop,SIGNAL(triggered(bool)),this,SLOT(stop_(bool)));*/
+
+    toArhive=new QAction(ELanguage::getWord(ARHIVE),this);
+    control->addAction(toArhive);
+    connect(toArhive,SIGNAL(triggered(bool)),this,SLOT(toArhiv(bool)));
 }
 void MainWindow::stateChanged(state_BD stat){
     switch (stat) {
@@ -95,6 +111,15 @@ void MainWindow::GRM(bool){
 }
 void MainWindow::setings(bool){
     (new Settings(bd,this))->show();
+}
+void MainWindow::dateManager_(bool){
+   (new DateEditor(bd,this))->show();
+}
+void MainWindow::stop_(bool){
+    bd->StopBD();
+}
+void MainWindow::toArhiv(bool){
+    bd->StopBD(true);
 }
 void MainWindow::connect_bd(bool){
     conf= Settings::readConf();

@@ -29,6 +29,10 @@ private:
 private slots:
 protected:
     /**
+     * @brief stateChang проверка состояния базы данных.
+     */
+    void stateChang();
+    /**
      * @brief error_msg
      * выброс сообщения об ошибке
      */
@@ -124,6 +128,12 @@ public:
      */
     QStringList& getGroupList();
     /**
+     * @brief getGroupPredmetsList вернет список предметов для группы.
+     * @param group группа для которой будет получн список предметов.
+     * @return вернет список предметов группы.
+     */
+    QStringList& getGroupPredmetsList(const QString & group);
+    /**
      * @brief getDateListP
      * @return веренет список всех дат для пропусков
      */
@@ -137,6 +147,17 @@ public:
      * @brief Query выполнить запрос
      */
     void Query(const QString&);
+    /**
+     * @brief StartDB запустит базу данных (начнет отчет)
+     * @param dayU новый день отчетности успеваемости (1-28)
+     * @param dayP новый день недели отчетности пропусков, (0-6)
+     */
+    void StartDB(const char dayU=-1,const char dayP=-1);
+    /**
+     * @brief StopBD остоновит базу данных
+     * @param toArhive следует ли переносить базу данных в архив.
+     */
+    void StopBD(const bool toArhive=false);
     /**
      * @brief Query_no_update выполнить запрос не обновляя модель запроса
      * @return верент истену если всё прошло успешно

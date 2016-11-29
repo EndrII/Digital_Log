@@ -29,6 +29,7 @@
 #include <QHeaderView>
 #include "MounthDialog.h"
 #include "Printer.h"
+#include <QKeyEvent>
 
 class StarastaMode : public QWidget
 {
@@ -50,6 +51,7 @@ public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
+    void keyPressEvent(QKeyEvent* event);
     void updateGroups();
     void clearFilterClick(bool);
     void alfavitClick(bool);
