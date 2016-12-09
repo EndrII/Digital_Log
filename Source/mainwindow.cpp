@@ -83,14 +83,9 @@ void MainWindow::stateChanged(state_BD stat){
         state->setStyleSheet("background-color : red;");
         break;
     case stoped:
-        state->setText("<center>"+ELanguage::getWord(STOPED)+"!<center>");
-        state->setMaximumHeight(20);
-        state->setStyleSheet("background-color : #F4A460;");
-        break;
-    case conectd:
         state->setText("<center>"+ELanguage::getWord(ONLINE)+"!<center>");
         state->setMaximumHeight(20);
-        state->setStyleSheet("background-color : #FFD700;");
+        state->setStyleSheet("background-color : #00FA9A;");
         break;
     default:
         break;

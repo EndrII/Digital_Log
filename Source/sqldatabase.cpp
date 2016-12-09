@@ -94,8 +94,10 @@ QStringList& sqlDataBase::getGroupPredmetsList(const QString& group){
     }
     return tempList;
 }
-QStringList& sqlDataBase::getDateListU(){
-    if(!qer->exec("select Даты from времяУроки")){
+QStringList& sqlDataBase::getDateListU(const QDate& beginRange,const QDate &endRange){
+    if(!qer->exec("select Даты from времяУроки where Даты<NOW() and"
+                  " Даты>='"+ beginRange.toString("yyyy-MM-dd")+"' and "
+                  "Даты<='"+endRange.toString("yyyy-MM-dd")+"'")){
         error_msg();
     }
     tempList.clear();
@@ -104,8 +106,10 @@ QStringList& sqlDataBase::getDateListU(){
     }
     return tempList;
 }
-QStringList& sqlDataBase::getDateListP(){
-    if(!qer->exec("select Даты from времяПропуски")){
+QStringList& sqlDataBase::getDateListP(const QDate &beginRange, const QDate &endRange){
+    if(!qer->exec("select Даты from времяПропуски where Даты<NOW() and"
+                  " Даты>='"+ beginRange.toString("yyyy-MM-dd")+"' and "
+                  "Даты<='"+endRange.toString("yyyy-MM-dd")+"'")){
         error_msg();
     }
     tempList.clear();
@@ -153,7 +157,15 @@ bool sqlDataBase::createDB(const QString &BaseName){
     }
     return false;
 }
-void sqlDataBase::createGroup(const QString &GroupName){
+void sqlDataBase::createGroup(QString GroupName){
+    if(GroupName.isEmpty())
+        return;
+    GroupName.remove(QRegExp("[`/'.]"));
+    removeFirstAndLastChars(' ',GroupName);
+    GroupName.replace(' ','_');
+    bool ok;
+    GroupName.toInt(&ok);
+    if(ok)GroupName.insert(0,'_');
     if(qer->exec("call createGroup('"+GroupName+"');")){
         emit Message(1,ELanguage::getWord(GROUP_CREATED)+" "+GroupName);
         emit ChangedBD();
@@ -161,7 +173,15 @@ void sqlDataBase::createGroup(const QString &GroupName){
         error_msg();
     }
 }
-void sqlDataBase::createPredmet(const QString &PredmetName){
+void sqlDataBase::createPredmet(QString PredmetName){
+    if(PredmetName.isEmpty())return;
+    PredmetName.remove(QRegExp("[`/'.]"));
+    removeFirstAndLastChars(' ', PredmetName);
+    PredmetName.replace(' ','_');
+    bool ok;
+    PredmetName.toInt(&ok);
+    if(ok)
+        PredmetName.insert(0,'_');
     if(qer->exec("call createPredmet('"+PredmetName+"');")){
         emit Message(1,ELanguage::getWord(PREDMET_CREATED)+" "+PredmetName);
         emit ChangedBD();
@@ -169,8 +189,16 @@ void sqlDataBase::createPredmet(const QString &PredmetName){
         error_msg();
     }
 }
+void sqlDataBase::removeFirstAndLastChars(const QChar item, QString &data){
+    while (data[0]==item) {
+        data.remove(0,1);
+    }
+    while (data[data.length()-1]==item) {
+        data.remove(data.length()-1,1);
+    }
+}
 void sqlDataBase::addStudent(const QString &group, const QString name){
-    if(qer->exec("call addStudent('"+name+"','"+group+"');")){
+    if(!name.isEmpty()&&qer->exec("call addStudent('"+name+"','"+group+"');")){
         qer->exec("select count(word) from prefix");
         qer->next();
         int longPrefix=qer->value(0).toInt();
@@ -178,8 +206,11 @@ void sqlDataBase::addStudent(const QString &group, const QString name){
         QSqlQuery tempQ(*this);
         while(qer->next())
             for(int i=2;i<longPrefix+2;i++){
+     //           select new.ФИО from new LEFT JOIN lc_eqnew ON lc_eqnew.ФИО=new.ФИО where lc_eqnew.ФИО is NULL;
                 QString tem="INSERT INTO "+qer->value(i).toString()+"(ФИО) "
-                                                                     " (select ФИО from "+group+")";
+                            " (select "+group+".ФИО from "+group+" LEFT JOIN"
+                            " "+qer->value(i).toString()+" ON "+qer->value(i).toString()+
+                            ".ФИО="+group+".ФИО where "+qer->value(i).toString()+".ФИО is NULL)";
 
                 qDebug()<<"temp q="<<tem<<"="<<tempQ.exec(tem);
             }
@@ -187,6 +218,32 @@ void sqlDataBase::addStudent(const QString &group, const QString name){
         emit ChangedBD();
     }else{
         error_msg();
+    }
+}
+void sqlDataBase::sumCount(const QString &group){
+    qer->exec("select *  from "+ group);
+    QSqlQuery query(*this);
+    while(qer->next()){
+        short summ=0;
+        qDebug()<<"qer->record().count()="<<qer->record().count();
+        for(short i=2;i<qer->record().count();i++){
+            summ+=qer->value(i).toInt();
+        }
+        QString debug="update "+group+" set sum="+QString::number(summ)+
+                " where ФИО='"+qer->value(1).toString()+"'";
+        qDebug()<<debug+" ="<<query.exec(debug);
+    }
+}
+void sqlDataBase::sumCount(const QString &group, const QString &predmet,const int &index){
+    QStringList prefix;
+    prefix<<"LC_"<<"PC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+    sumCount(prefix[index]+predmet+group);
+}
+void sqlDataBase::sumCount(const QString &group, const QString &predmet){
+    QStringList prefix;
+    prefix<<"LC_"<<"PC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+    for(QString i:prefix){
+        sumCount(i+predmet+group);
     }
 }
 void sqlDataBase::deleteStudent(const QString &group, const QString name){

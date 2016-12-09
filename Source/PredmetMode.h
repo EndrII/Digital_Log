@@ -28,24 +28,28 @@
 #include <QFileDialog>
 #include <QHeaderView>
 #include "MounthDialog.h"
-#include "Printer.h"
+#include "PrinterDialog.h"
+#include <QDateEdit>
 class PredmetMode : public QWidget
 {
     Q_OBJECT
 private:
     sqlDataBase *bd;
+    QAnimationGroup *menu;
     QSqlQuery *qyer;
     QSqlQueryModel *model;
     QComboBox *groups;
+    QComboBox *prefix;
+    QLabel *beginRangeL,*endRangeL;
+    QDateEdit *beginRange,*endRange;
     QComboBox *predmets;
     QComboBox *times;
     QPushButton *print_;
     QPushButton *change;
-    //QPushButton *remove
     QTableView *table;
-    QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime,*PrintHTML,*PrintPDF,*onlySumm;
     void createContextMenu();
     void updateTable(const QString &name, const QString &time);
+    void updateTable(const QString &name);
 public:
     explicit PredmetMode(sqlDataBase*bd, QWidget *parent = 0);
     ~PredmetMode();
@@ -53,17 +57,9 @@ private slots:
     void keyPressEvent(QKeyEvent* event);
     void ComboWrite(int);
     void updateGroups();
-    void clearFilterClick(bool);
-    void alfavitClick(bool);
-    void maxtominClick(bool);
-    void mintomaxClick(bool);
-    void curentTimeClick(bool);
-    void ClickPrintHTML(bool);
-    void ClickPrintPDF(bool);
-    void ClickOnlySumm(bool);
-    void PrintClick();
+    void updateTable();
     void changeClick();
-   // void removeClick();
+    void PrintClick();
     void GroupListChanged(int);
 protected slots:
     void contextMenuEvent(QContextMenuEvent *event);

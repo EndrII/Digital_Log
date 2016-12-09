@@ -18,6 +18,7 @@
 #include <QStringListModel>
 #include "SpaceEngineComponents/System/ELanguage.h"
 #include "sqldatabase.h"
+#include <QDateEdit>
 class DateMaster: public QDialog
 {
     Q_OBJECT
@@ -27,10 +28,9 @@ private:
     sqlDataBase *database;
     QTabWidget *modeTab;
     QPushButton * ok,*cancel;
-    QLineEdit *BeginDate,*EndDate;
+    QDateEdit *BeginDate,*EndDate;
     QTableView *dayNames;
     QSpinBox *intervalFromMode1,*numberFirstDate;
-    //QComboBox *intervalFromMode2;
 private slots:
     void cancle_(bool);
     void ok_(bool);

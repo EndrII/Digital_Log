@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     settings.cpp \
     PredmetMode.cpp \
     DateEditor.cpp \
-    DateMaster.cpp
+    DateMaster.cpp \
+    PrinterDialog.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -68,9 +69,11 @@ HEADERS  += mainwindow.h \
     settings.h \
     PredmetMode.h \
     DateEditor.h \
-    DateMaster.h
+    DateMaster.h \
+    PrinterDialog.h
 
-FORMS +=
+FORMS += \
+    form.ui
 
 RESOURCES += \
     res.qrc \

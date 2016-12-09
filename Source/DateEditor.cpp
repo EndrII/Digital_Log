@@ -38,10 +38,12 @@ DateEditor::DateEditor(sqlDataBase *database, QWidget *ptr):
     connect(autoU,SIGNAL(clicked(bool)),this,SLOT(DateMasterU(bool)));
 }
 void DateEditor::DateMasterP(bool){
-    (new DateMaster(db,"времяПропуски",this))->show();
+    (new DateMaster(db,"времяПропуски",this))->exec();
+    updateTables();
 }
 void DateEditor::DateMasterU(bool){
-    (new DateMaster(db,"времяУроки",this))->show();
+    (new DateMaster(db,"времяУроки",this))->exec();
+    updateTables();
 }
 void DateEditor::updateTables(){
     qyerP->exec("select Даты  from времяПропуски");
@@ -58,13 +60,21 @@ void DateEditor::contextMenuEvent(QContextMenuEvent *event){
 }
 void DateEditor::AddDate_(bool){
     if(this->focusWidget()==tableP){
-        QString q="INSERT INTO времяПропуски(Даты) VALUES (STR_TO_DATE('"+
-                QInputDialog::getText(this,ELanguage::getWord(DATE_P),
-                                      ELanguage::getWord(DATE_P_ABOUT))+
-                                      "', '%d.%m.%Y'))";
+        QString q="INSERT INTO времяПропуски(Даты) VALUES (STR_TO_DATE('";
+        QString ok;
+        ok= QInputDialog::getText(this,ELanguage::getWord(DATE_P),
+                              ELanguage::getWord(DATE_P_ABOUT));
+        ok.remove(' ');
+        if(ok.isEmpty())
+            return;
+        q+=ok;
+        q+="', '%d.%m.%Y'))";
         qDebug()<<q<<" result="<<qyerP->exec(q);
         qyerP->exec("select Даты  from времяПропуски");
         modelP->setQuery(*qyerP);
+        db->Query_no_update("update времяПропуски set  id=("
+                                  "SELECT @number_:= @number_ + 1 FROM"
+                                  "(SELECT @number_:= 0) as tbl);");
     }
     if(this->focusWidget()==tableU){
         QString q="INSERT INTO времяУроки(Даты) VALUES (STR_TO_DATE('"+
@@ -74,6 +84,9 @@ void DateEditor::AddDate_(bool){
         qDebug()<<q<<" result="<<qyerU->exec(q);
         qyerU->exec("select Даты  from времяУроки");
         modelU->setQuery(*qyerU);
+        db->Query_no_update("update времяУроки set  id=("
+                                  "SELECT @number_:= @number_ + 1 FROM"
+                                  "(SELECT @number_:= 0) as tbl);");
     }
 }
 void DateEditor::deleteDate_(bool){

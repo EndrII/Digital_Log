@@ -27,8 +27,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QDateEdit>
 #include "MounthDialog.h"
-#include "Printer.h"
+#include "PrinterDialog.h"
 #include <QKeyEvent>
 
 class StarastaMode : public QWidget
@@ -40,27 +41,20 @@ private:
     QSqlQuery *qyer;
     QSqlQueryModel *model;
     QComboBox *groups;
-    QComboBox *times;
+    QDateEdit *beginRange,*endRange;
     QPushButton *print_;
     QPushButton *change;
     //QPushButton *remove;
     QTableView *table;
-    QAction *clearFilter,*alfavit,*maxtomin,*mintomax,*curentTime,*PrintHTML,*PrintPDF,*onlySumm;
     void createContextMenu();
+    //void countSum();
 public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
+    void updateTable();
     void keyPressEvent(QKeyEvent* event);
     void updateGroups();
-    void clearFilterClick(bool);
-    void alfavitClick(bool);
-    void maxtominClick(bool);
-    void mintomaxClick(bool);
-    void curentTimeClick(bool);
-    void ClickPrintHTML(bool);
-    void ClickPrintPDF(bool);
-    void ClickOnlySumm(bool);
     void PrintClick();
     void changeClick();
    // void removeClick();
@@ -69,7 +63,6 @@ protected slots:
     void contextMenuEvent(QContextMenuEvent *event);
 signals:
 public slots:
-    void Editing();
     //void BDOpened(QString);
 };
 

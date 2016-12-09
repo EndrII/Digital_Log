@@ -77,12 +77,12 @@ public:
      * @brief createGroup создаст группу
      * @param GroupName имя группы
      */
-    void createGroup(const QString &GroupName);
+    void createGroup(QString GroupName);
     /**
      * @brief createPredmet создаст предмет
      * @param PredemtName имя нового предмета
      */
-    void createPredmet(const QString &PredemtName);
+    void createPredmet(QString PredemtName);
     /**
      * @brief createDB создаст новую базу данных, и подготовит её к работе
      * @param BaseName имя
@@ -118,6 +118,25 @@ public:
      */
     void deleteStudent(const QString &group, const QString name);
     /**
+     * @brief sumCount пересчитает суммы для указанной группы по предмету.
+     * @param group группа для которой будет выполнен пересчёт
+     * @param predmet предмет для которого будет выполнятся пересчёт
+     * @param index индекс префикса для которого будет выполнен пересчёт
+     */
+    void sumCount(const QString & group, const QString& predmet,const int &index);
+
+    /**
+     * @brief sumCount пересчитает суммы для указанной группы по предмету.
+     * @param group группа для которой будет выполнен пересчёт
+     * @param predmet предмет для которого будет выполнятся пересчёт
+     */
+    void sumCount(const QString & group, const QString& predmet);
+    /**
+     * @brief sumCount пересчитает суммы для указанной группы.
+     * @param group - имя группы дял которой буду перещетанны столбцы.
+     */
+    void sumCount(const QString & group);
+    /**
      * @brief getModel
      * @return вернет стандартную модель предстовления стандартного запроса
      */
@@ -135,14 +154,18 @@ public:
     QStringList& getGroupPredmetsList(const QString & group);
     /**
      * @brief getDateListP
+     * @param beginRange первая дата
+     * @param endRange  конечная дата
      * @return веренет список всех дат для пропусков
      */
-    QStringList& getDateListP();//propuski
+    QStringList& getDateListP(const QDate& beginRange=QDate(0,0,0),const QDate& endRange=QDate::currentDate());//propuski
     /**
      * @brief getDateListU
+     * @param beginRange первая дата
+     * @param endRange  конечная дата
      * @return вернет список всех дат для предметов
      */
-    QStringList& getDateListU();//uspevaimost
+    QStringList& getDateListU(const QDate &beginRange=QDate(0,0,0), const QDate &endRange=QDate::currentDate());//uspevaimost
     /**
      * @brief Query выполнить запрос
      */
@@ -169,7 +192,12 @@ public:
      * @param name имя студента
      */
     void addStudent(const QString& group,const QString name);
-
+    /**
+     * @brief removeFirstAndLastChars удалит в конце и в начале строки казанные символы.
+     * @param item символы которые будут удалятся
+     * @param data стока которая будет обрабатыватся
+     */
+    static void removeFirstAndLastChars(const QChar item,QString& data);
     ~sqlDataBase();
 
 signals:

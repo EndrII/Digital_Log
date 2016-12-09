@@ -4,53 +4,26 @@ Printer::Printer()
 {
 
 }
-bool Printer::printHtml(QTableWidget *table, const QString &dop, QString patch){
-    if(patch.mid(patch.size()-4).compare("html",Qt::CaseInsensitive)!=0)
-        patch+=".html";
-    QFile f(patch);
-    if(f.open(QIODevice::WriteOnly|QIODevice::Truncate)){
-        QTextStream stream(&f);
-        /*stream<<"<meta charset='UTF-8'>"
-              <<"<style>table {"
-              <<"width:100%;"
-              <<"border-collapse: collapse;"
-              <<"border: 2px solid black;}"
-              <<"td {    padding: 5px;"
-              <<"padding-right: 30px;"
-              <<"border: 1px solid lightgray;}"
-              <<"th {}"
-              <<"</style>"
-              <<"<table>"<<
-                "<tr><td></td>";
-       // int temp=table->columnCount();
-        for(int i=0;i<table->columnCount();i++){
-            stream<<"<td>"<<table->horizontalHeaderItem(i)->text()<<"</td>";
-        }
-        stream<<"</tr>";
-        for(int i=0;i<table->rowCount();i++){
-            stream<<"<tr>"<<"<td>"<<table->verticalHeaderItem(i)->text()<<"</td>";
-            for(int j=0;j<table->columnCount();j++){
-                if(qobject_cast<QLabel*>(table->cellWidget(i,j))!=NULL){
-                    stream<<"<td>"<<((QLabel*)table->cellWidget(i,j))->text()<<"</td>";
-                }else{
-                    stream<<"<td>"<<((QLineEdit*)table->cellWidget(i,j))->text()<<"</td>";
-                }
-            }
-            stream<<"</tr>";
-        }
-        stream<<"</table>";*/
-        stream<<dop;
-        stream<<Printer::getHTML(table);
-        f.close();
-        return true;
-    }else
-        return false;
+bool Printer::print(QTableView *table, QString patch, const QString &type){
+       return Printer::print(Printer::getHTML(table),patch,type);
 }
-
-QString Printer::getHTML(QTableWidget *table){
-    QString stream;
-        stream+="<meta charset='UTF-8'>"
-              "<style>table {"
+bool Printer::print(const QString &code, QString patch,const QString&type ){
+    if(patch.mid(patch.size()-type.length()).compare(type,Qt::CaseInsensitive)!=0)
+            patch+="."+type;
+        QFile f(patch);
+        if(f.open(QIODevice::WriteOnly|QIODevice::Truncate)){
+            QTextStream stream(&f);
+            stream.setCodec("UTF-8");
+            stream<<code;
+            f.close();
+            return true;
+        }else
+            return false;
+}
+QString Printer::getHTML(QTableView *table,const QString&style ){
+    QString stream("<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>");
+    if(style.isEmpty()){
+        stream+="<style>table {"
               "width:100%;"
               "border-collapse: collapse;"
               "border: 2px solid black;}"
@@ -58,40 +31,37 @@ QString Printer::getHTML(QTableWidget *table){
               "padding-right: 30px;"
               "border: 1px solid lightgray;}"
               "th {}"
-              "</style>"
-              "<table>"
-                "<tr><td></td>";
-       // int temp=table->columnCount();
-        for(int i=0;i<table->columnCount();i++){
-            stream+="<td>"+table->horizontalHeaderItem(i)->text()+"</td>";
-        }
-        stream+="</tr>";
-        for(int i=0;i<table->rowCount();i++){
-            stream+="<tr><td>"+table->verticalHeaderItem(i)->text()+"</td>";
-            for(int j=0;j<table->columnCount();j++){
-                if(qobject_cast<QLabel*>(table->cellWidget(i,j))!=NULL){
-                    stream+="<td>"+((QLabel*)table->cellWidget(i,j))->text()+"</td>";
-                }else{
-                    stream+="<td>"+((QLineEdit*)table->cellWidget(i,j))->text()+"</td>";
-                }
+              "</style>";
+    }else{
+        stream+=style;
+    }
+    stream+="<table id=PrintPage><tr><th></th>";
+    for(int i=0;i<table->model()->columnCount();i++){
+        stream+="<th>"+table->model()->headerData(i,Qt::Horizontal).toString()+"</th>";
+    }
+    stream+="</tr>";
+    for(int i=0;i<table->model()->rowCount();i++){
+        stream+="<tr><td>"+QString::number(i+1)+")</td>";
+        for(int j=0;j<table->model()->columnCount();j++){
+             stream+="<td>"+table->model()->data(table->model()->index(i,j)).toString()+"</td>";
             }
-            stream+="</tr>";
-        }
-        stream+="</table>";
-        return stream;
-
+        stream+="</tr>";
+    }
+    stream+="</table>";
+    return stream;
 }
-bool Printer::printPDF(QTableWidget *table,const QString& dop ,QString patch){
+bool Printer::printPDF(QTableView *table, QString patch){
+    return Printer::printPDF(Printer::getHTML(table),patch);
+}
+bool Printer::printPDF(const QString& code ,QString patch){
     if(patch.mid(patch.size()-3).compare("pdf",Qt::CaseInsensitive)!=0)
         patch+=".pdf";
     QTextDocument doc;
-    QString temp=dop+Printer::getHTML(table);
-    doc.setHtml(temp);
+    doc.setHtml(code);
     QPrinter p(QPrinter::HighResolution);
     p.setPageSize(QPrinter::A4);
     p.setOutputFormat(QPrinter::PdfFormat);
     p.setOutputFileName(patch);
-
     doc.print(&p);
     return true;
 }

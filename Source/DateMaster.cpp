@@ -8,8 +8,10 @@ DateMaster::DateMaster(sqlDataBase *bd, const QString &tablename, QWidget * ptr)
     database=bd;
     QVBoxLayout *box=new QVBoxLayout();
     QHBoxLayout *tempBox=new QHBoxLayout();
-    BeginDate=new QLineEdit("00.00.0000");
-    EndDate=new QLineEdit("00.00.0000");
+    BeginDate=new QDateEdit(QDate::currentDate());
+    BeginDate->setDisplayFormat("dd.MM.yyyy");
+    EndDate=new QDateEdit(QDate::currentDate().addYears(1));
+    EndDate->setDisplayFormat("dd.MM.yyyy");
     tempBox->addWidget(BeginDate);
     tempBox->addWidget(EndDate);
     box->addLayout(tempBox);
@@ -61,15 +63,14 @@ DateMaster::DateMaster(sqlDataBase *bd, const QString &tablename, QWidget * ptr)
 }
 void DateMaster::ok_(bool){
     if(!modeTab->currentIndex()){
-        QDate date=QDate::fromString(BeginDate->text(),"dd.MM.yyyy"),
-                end=QDate::fromString(EndDate->text(),"dd.MM.yyyy");
-        bar->setMaximum(date.daysTo(end)/intervalFromMode1->value());
-        if(bar->maximum()>1000||!date.isValid()||!end.isValid()){
+        QDate date=BeginDate->date();
+        bar->setMaximum(date.daysTo(EndDate->date())/intervalFromMode1->value());
+        if(bar->maximum()>1000){
             QMessageBox::information(this,ELanguage::getWord(ERROR),ELanguage::getWord(ERROR_DATE));
             return;
         }
         int progress=0;
-        while(date<=end){
+        while(date<=EndDate->date()){
             date=date.addDays(intervalFromMode1->value());
             int i=0;
             while(i<dayNames->selectionModel()->selectedRows().size()&&
@@ -83,16 +84,15 @@ void DateMaster::ok_(bool){
             bar->setValue(++progress);
         }
     }else{
-        QDate date=QDate::fromString(BeginDate->text(),"dd.MM.yyyy"),
-                end=QDate::fromString(EndDate->text(),"dd.MM.yyyy");
-        bar->setMaximum(date.daysTo(end)/30);
-        if(bar->maximum()>1000||!date.isValid()||!end.isValid()){
+        QDate date=BeginDate->date();
+        bar->setMaximum(date.daysTo(EndDate->date())/30);
+        if(bar->maximum()>1000){
             QMessageBox::information(this,ELanguage::getWord(ERROR),ELanguage::getWord(ERROR_DATE));
             return;
         }
         int progress=0;
         date.setDate(date.year(),date.month(),1);
-        while(date<=end){
+        while(date<=EndDate->date()){
             date=date.addMonths(1);
             database->Query_no_update("INSERT INTO "+tableTimeName+
                                      "(Даты) VALUES (STR_TO_DATE('"+
@@ -101,6 +101,9 @@ void DateMaster::ok_(bool){
             bar->setValue(++progress);
         }
     }
+    database->Query_no_update("update "+tableTimeName+" set  id=("
+                              "SELECT @number_:= @number_ + 1 FROM"
+                              "(SELECT @number_:= 0) as tbl);");
     this->close();
 }
 void DateMaster::cancle_(bool){

@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QLabel>
 #include <QLineEdit>
-#include <QTableWidget>
+#include <QTableView>
 #include <QTextDocument>
 #include <QPrinter>
 #include <QTextStream>
@@ -13,9 +13,12 @@ private:
    // QPdfWriter *writer;
 public:
     explicit Printer();
-    static bool printHtml(QTableWidget* table, const QString &dop, QString patch="./page.HTML");
-    static inline QString getHTML(QTableWidget* table);
-    static bool printPDF(QTableWidget* table, const QString &dop, QString patch="./page.pdf");
+    static bool print(QTableView* table, QString patch="./page",const QString& type="HTML");
+    static bool print(const QString &code, QString patch="./page",const QString& type="HTML");
+    static QString getHTML(QTableView *table, const QString &style="");
+    static bool printPDF(QTableView *table, QString patch="./page.pdf");
+    static bool printPDF(const QString &code, QString patch="./page.pdf");
+
     virtual ~Printer();
 };
 
