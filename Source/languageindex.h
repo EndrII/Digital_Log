@@ -102,4 +102,16 @@
 #define END 99
 #define NAME 100
 #define SUMM 101
+#define FILE_MENU 102
+#define SORT_UP 103
+#define SORT_DOWN 104
+#define ENTER 105
+#define LIMIT_TITLE 105
+#define LIMIT_ABOUT 106
+#define NORMA_YAHR 107
+#define PLAN_WORK_YAHR 108
+#define LC_WORKS 109
+#define PC_WORKS 110
+#define KRC_WORKS 111
+#define RGRC_WORKS 112
 #endif // LANGUAGEINDEX_H

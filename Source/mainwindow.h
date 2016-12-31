@@ -44,7 +44,7 @@ private:
     QTabWidget *tab;
     QLabel *state;
     QTextEdit *LogPanel;
-    QMenu *control;
+    QMenu *control,*file;
     QAction *mset,*bases,*grs,*connect_m,*closeA,*DateManager,*stop,*toArhive;
     void createMenu();
 private slots:

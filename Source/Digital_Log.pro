@@ -44,7 +44,9 @@ SOURCES += main.cpp\
     PredmetMode.cpp \
     DateEditor.cpp \
     DateMaster.cpp \
-    PrinterDialog.cpp
+    PrinterDialog.cpp \
+    MySqlQueryColorModel.cpp \
+    LimitWorksWidget.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -70,7 +72,9 @@ HEADERS  += mainwindow.h \
     PredmetMode.h \
     DateEditor.h \
     DateMaster.h \
-    PrinterDialog.h
+    PrinterDialog.h \
+    MySqlQueryColorModel.h \
+    LimitWorksWidget.h
 
 FORMS += \
     form.ui

@@ -37,13 +37,16 @@ class StarastaMode : public QWidget
     Q_OBJECT
 private:
     void ComboWrite();
+    QStringList listColumnHaider;
     sqlDataBase *bd;
+    QAction *sortUP,*sortDOWN,*enter;
     QSqlQuery *qyer;
     QSqlQueryModel *model;
     QComboBox *groups;
     QDateEdit *beginRange,*endRange;
     QPushButton *print_;
-    QPushButton *change;
+    QSpinBox *limit;
+    //QPushButton *change;
     //QPushButton *remove;
     QTableView *table;
     void createContextMenu();
@@ -52,11 +55,15 @@ public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
-    void updateTable();
+    //void sortChanged(QModelIndex, QModelIndex);
+    void Enter();
+    void sortTableU();
+    void sortTableD();
+    void updateTable(const short &index=0,bool DESC=false);
     void keyPressEvent(QKeyEvent* event);
     void updateGroups();
     void PrintClick();
-    void changeClick();
+    void limitChange(int);
    // void removeClick();
     void GroupListChanged(int);
 protected slots:

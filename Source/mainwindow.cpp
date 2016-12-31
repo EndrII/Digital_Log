@@ -44,21 +44,23 @@ MainWindow::MainWindow(QWidget *parent)
     createMenu();
 }
 void MainWindow::createMenu(){
+    file=new QMenu(ELanguage::getWord(FILE_MENU),this);
+    this->menuBar()->addMenu(file);
     connect_m=new QAction(ELanguage::getWord(RECONNECT),this);
-    this->menuBar()->addAction(connect_m);
+    file->addAction(connect_m);
     connect(connect_m,SIGNAL(triggered(bool)),this,SLOT(connect_bd(bool)));
 
     grs=new QAction(ELanguage::getWord(GROUP_MG),this);
-    this->menuBar()->addAction(grs);
+    file->addAction(grs);
     connect(grs,SIGNAL(triggered(bool)),this,SLOT(GRM(bool)));
 
     bases=new QAction(ELanguage::getWord(DATA_BASES),this);
     bases->setStatusTip(ELanguage::getWord(DATA_BASES_ABOUT));
-    this->menuBar()->addAction(bases);
+    file->addAction(bases);
     connect(bases,SIGNAL(triggered(bool)),this,SLOT(BASES(bool)));
 
     mset=new QAction(ELanguage::getWord(DATABASE_SETTINGS),this);
-    this->menuBar()->addAction(mset);
+    file->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
     control=new QMenu(ELanguage::getWord(STATUS_CONTROL),this);

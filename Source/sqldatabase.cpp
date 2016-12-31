@@ -106,6 +106,24 @@ QStringList& sqlDataBase::getDateListU(const QDate& beginRange,const QDate &endR
     }
     return tempList;
 }
+int sqlDataBase::getDateUCount(bool all){
+    if(!qer->exec("select COUNT(Даты) from времяУроки"+((!all)?QString(" where Даты<NOW()"):QString()))){
+        error_msg();
+    }else{
+        qer->next();
+        return qer->value(0).toInt();
+    }
+    return -1;
+}
+int sqlDataBase::getDatePCount(bool all){
+    if(!qer->exec("select COUNT(Даты) from времяПропуски"+((!all)?QString(" where Даты<NOW()"):QString()))){
+        error_msg();
+    }else{
+        qer->next();
+        return qer->value(0).toInt();
+    }
+    return -1;
+}
 QStringList& sqlDataBase::getDateListP(const QDate &beginRange, const QDate &endRange){
     if(!qer->exec("select Даты from времяПропуски where Даты<NOW() and"
                   " Даты>='"+ beginRange.toString("yyyy-MM-dd")+"' and "
@@ -188,6 +206,23 @@ void sqlDataBase::createPredmet(QString PredmetName){
     }else{
         error_msg();
     }
+}
+int sqlDataBase::getGroupLimit(const QString &group){
+    qer->exec("select lim from группы where Имя='"+group+"'");
+    qer->next();
+    return qer->value(0).toInt();
+}
+void sqlDataBase::setGroupLimit(const QString &group,const int &limit){
+    qer->exec("update группы set lim="+QString::number(limit)+"  where Имя='"+group+"'");
+}
+int sqlDataBase::getGroupLimit(const QString &group,const QString &prefix,const QString &predmet){
+    qer->exec("select lim from limits where группа='"+group+"' and предмет='"+predmet+"' and prefix_='"+prefix+"'");
+    qer->next();
+    return qer->value(0).toInt();
+}
+void sqlDataBase::setGroupLimit(const QString &group,const QString &prefix,const QString &predmet, const int &limit){
+    QString q="update limits set lim="+QString::number(limit)+"  where группа='"+group+"' and предмет='"+predmet+"' and prefix_='"+prefix+"'";
+    qDebug()<<q+" ="<<qer->exec(q);
 }
 void sqlDataBase::removeFirstAndLastChars(const QChar item, QString &data){
     while (data[0]==item) {

@@ -5,7 +5,7 @@
 #include <QSql>
 #include <QSqlDatabase>
 #include <QSqlQuery>
-#include <QSqlQueryModel>
+#include "MySqlQueryColorModel.h"
 #define PORT 2277
 /**
  * @brief The state_BD enum
@@ -167,6 +167,16 @@ public:
      */
     QStringList& getDateListU(const QDate &beginRange=QDate(0,0,0), const QDate &endRange=QDate::currentDate());//uspevaimost
     /**
+     * @brief getDateUCount получит количесвто дат по успеваемости
+     * @return количество дат по успеваемости
+     */
+    int getDateUCount(bool all=false);
+    /**
+     * @brief getDatePCount получит количество по пропускам
+     * @return количесвто дат по пропускам
+     */
+    int getDatePCount(bool all=false);
+    /**
      * @brief Query выполнить запрос
      */
     void Query(const QString&);
@@ -193,10 +203,39 @@ public:
      */
     void addStudent(const QString& group,const QString name);
     /**
+     * @brief getGroupLimit вернет лимит пропусков выбранной группы
+     * @param group имя группы
+     * @return вернет количество пропусков
+     */
+    int getGroupLimit(const QString& group);
+    /**
+     * @brief setGroupLimit тоже самое но для успеваемости
+     * @param group группа
+     * @param prefix префикс
+     * @param predmet предмет
+     * @return вернет количество пропусков
+     */
+    int getGroupLimit(const QString &group,const QString &prefix,const QString &predmet);
+    /**
+     * @brief setGroupLimit устатновит новый лимит группе
+     * @param group группа которой будет установлен новый лимит
+     * @param limit новый лимит
+     */
+    void setGroupLimit(const QString& group,const int& limit);
+    /**
+     * @brief setGroupLimit тоже самое но для успеваемости
+     * @param group группа
+     * @param prefix префикс
+     * @param predmet предмет
+     * @param limit новый лимит
+     */
+    void setGroupLimit(const QString &group,const QString &prefix,const QString &predmet, const int &limit);
+    /**
      * @brief removeFirstAndLastChars удалит в конце и в начале строки казанные символы.
      * @param item символы которые будут удалятся
      * @param data стока которая будет обрабатыватся
      */
+
     static void removeFirstAndLastChars(const QChar item,QString& data);
     ~sqlDataBase();
 

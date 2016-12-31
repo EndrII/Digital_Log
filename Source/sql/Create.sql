@@ -1,4 +1,4 @@
-/*version - 1.4.2*/
+/*version - 1.5.1*/
 
 
 create table prefix(
@@ -26,21 +26,37 @@ create table времяУроки(
 id int NOT NULL DEFAULT 0,
 Даты date NOT NULL UNIQUE
 )ENGINE=InnoDB CHARACTER SET=UTF8;
+
+
 create table группы(
 num int NOT NULL DEFAULT 0,
-lim int NOT NULL DEFAULT 48, 
+lim int NOT NULL DEFAULT 48,
 Имя VARCHAR(100) NOT NULL,
 PRIMARY KEY(Имя)
 )ENGINE=InnoDB CHARACTER SET=UTF8;
 create table предметы(
 num int NOT NULL DEFAULT 0,
-KRC_lim int NOT NULL DEFAULT 0, 
-LD_lim int NOT NULL DEFAULT 0, 
-KRD_lim int NOT NULL DEFAULT 0, 
-RGRD_lim int NOT NULL DEFAULT 0, 
 Наименование VARCHAR(100) NOT NULL,
 PRIMARY KEY(Наименование)
 )ENGINE=InnoDB CHARACTER SET=UTF8;
+
+create table limits(
+lim INT DEFAULT 0,
+группа VARCHAR(100),
+предмет VARCHAR(100),
+prefix_ VARCHAR(100),
+FOREIGN KEY(группа) REFERENCES группы(Имя)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+FOREIGN KEY(предмет) REFERENCES предметы(Наименование)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+FOREIGN KEY(prefix_) REFERENCES prefix(word)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)ENGINE=InnoDB CHARACTER SET=UTF8;
+
+ALTER TABLE limits ADD UNIQUE INDEX (группа,предмет,prefix_);
 
 DELIMITER |
 CREATE PROCEDURE update_table (IN name VARCHAR(100) CHARACTER SET utf8,
@@ -188,6 +204,11 @@ BEGIN
 
                 SET @i=@i+1;
         END WHILE;
+		INSERT INTO  limits(группа,предмет,prefix_) VALUES 
+		(Gr,name,'LC_'),
+		(Gr,name,'PC_'),
+		(Gr,name,'KRC_'),
+		(Gr,name,'RGRC_');
 END|
 DELIMITER ;
 
