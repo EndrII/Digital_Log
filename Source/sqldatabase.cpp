@@ -36,13 +36,13 @@ void sqlDataBase::stateChang(){
     if(temp!=state)
         emit stateChanged(state=temp);
 }
-void sqlDataBase::error_msg(){
+void sqlDataBase::error_msg(const QString& Messag){
     if(!this->isOpen()){
         connect_to();
     }
-    emit Message(0,ELanguage::getWord(MYSQL_ERROR_MSG)+":\n"+
-                 ELanguage::getWord(DRIVER_MSG)+": "+this->lastError().driverText()+". \n"+
-                 ELanguage::getWord(BATABASE_MSG)+": "+this->lastError().databaseText());
+    if(Messag!="none"){
+        emit Message(0,Messag);
+    }
 }
 bool sqlDataBase::SqlExec(QSqlQuery *sq, const QString &sqlFile){
     QFile f(sqlFile);
@@ -76,7 +76,7 @@ QSqlQueryModel *sqlDataBase::getModel() const{
 }
 QStringList& sqlDataBase::getGroupList(){
     if(!qer->exec("select Имя from группы")){
-        error_msg();
+        error_msg(ELanguage::getWord(LOCALE_ERROR)+" QStringList& sqlDataBase::getGroupList()");
     }
     tempList.clear();
     while(qer->next()){
@@ -98,7 +98,7 @@ QStringList& sqlDataBase::getDateListU(const QDate& beginRange,const QDate &endR
     if(!qer->exec("select Даты from времяУроки where Даты<NOW() and"
                   " Даты>='"+ beginRange.toString("yyyy-MM-dd")+"' and "
                   "Даты<='"+endRange.toString("yyyy-MM-dd")+"'")){
-        error_msg();
+        error_msg(ELanguage::getWord(LOCALE_ERROR)+"QStringList& sqlDataBase::getDateListU(const QDate& beginRange,const QDate &endRange)");
     }
     tempList.clear();
     while(qer->next()){
@@ -108,7 +108,7 @@ QStringList& sqlDataBase::getDateListU(const QDate& beginRange,const QDate &endR
 }
 int sqlDataBase::getDateUCount(bool all){
     if(!qer->exec("select COUNT(Даты) from времяУроки"+((!all)?QString(" where Даты<NOW()"):QString()))){
-        error_msg();
+        error_msg(ELanguage::getWord(LOCALE_ERROR)+"int sqlDataBase::getDateUCount(bool all)");
     }else{
         qer->next();
         return qer->value(0).toInt();
@@ -117,7 +117,7 @@ int sqlDataBase::getDateUCount(bool all){
 }
 int sqlDataBase::getDatePCount(bool all){
     if(!qer->exec("select COUNT(Даты) from времяПропуски"+((!all)?QString(" where Даты<NOW()"):QString()))){
-        error_msg();
+        error_msg(ELanguage::getWord(LOCALE_ERROR)+"int sqlDataBase::getDatePCount(bool all)");
     }else{
         qer->next();
         return qer->value(0).toInt();
@@ -128,7 +128,7 @@ QStringList& sqlDataBase::getDateListP(const QDate &beginRange, const QDate &end
     if(!qer->exec("select Даты from времяПропуски where Даты<NOW() and"
                   " Даты>='"+ beginRange.toString("yyyy-MM-dd")+"' and "
                   "Даты<='"+endRange.toString("yyyy-MM-dd")+"'")){
-        error_msg();
+        error_msg(ELanguage::getWord(LOCALE_ERROR)+"QStringList& sqlDataBase::getDateListP(const QDate &beginRange, const QDate &endRange)");
     }
     tempList.clear();
     while(qer->next()){
@@ -159,14 +159,12 @@ bool sqlDataBase::Query_no_update(const QString &str){
 }
 void sqlDataBase::openDB(const QString &BaseName){
     if(!qer->exec("use "+BaseName)){
-        error_msg();
+        error_msg(ELanguage::getWord(DB_DONOTSELECTED));
     }else{
         emit Message(1,ELanguage::getWord(SELECTED_DB)+" "+BaseName);
         emit ChangedBD();
         stateChang();
-
     }
-
 }
 bool sqlDataBase::createDB(const QString &BaseName){
     if(qer->exec("create database "+BaseName)&&
@@ -188,7 +186,7 @@ void sqlDataBase::createGroup(QString GroupName){
         emit Message(1,ELanguage::getWord(GROUP_CREATED)+" "+GroupName);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_CREATING_GROUP));
     }
 }
 void sqlDataBase::createPredmet(QString PredmetName){
@@ -204,7 +202,7 @@ void sqlDataBase::createPredmet(QString PredmetName){
         emit Message(1,ELanguage::getWord(PREDMET_CREATED)+" "+PredmetName);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_CREATING_PREDMET));
     }
 }
 int sqlDataBase::getGroupLimit(const QString &group){
@@ -222,7 +220,7 @@ int sqlDataBase::getGroupLimit(const QString &group,const QString &prefix,const 
 }
 void sqlDataBase::setGroupLimit(const QString &group,const QString &prefix,const QString &predmet, const int &limit){
     QString q="update limits set lim="+QString::number(limit)+"  where группа='"+group+"' and предмет='"+predmet+"' and prefix_='"+prefix+"'";
-    qDebug()<<q+" ="<<qer->exec(q);
+    qer->exec(q);
 }
 void sqlDataBase::removeFirstAndLastChars(const QChar item, QString &data){
     while (data[0]==item) {
@@ -237,17 +235,16 @@ void sqlDataBase::addStudent(const QString &group, const QString name){
         qer->exec("select count(word) from prefix");
         qer->next();
         int longPrefix=qer->value(0).toInt();
-        qDebug()<<"all tables="<<qer->exec("select * from p_"+group);
+        qer->exec("select * from P_"+group);
         QSqlQuery tempQ(*this);
         while(qer->next())
             for(int i=2;i<longPrefix+2;i++){
-     //           select new.ФИО from new LEFT JOIN lc_eqnew ON lc_eqnew.ФИО=new.ФИО where lc_eqnew.ФИО is NULL;
                 QString tem="INSERT INTO "+qer->value(i).toString()+"(ФИО) "
                             " (select "+group+".ФИО from "+group+" LEFT JOIN"
                             " "+qer->value(i).toString()+" ON "+qer->value(i).toString()+
                             ".ФИО="+group+".ФИО where "+qer->value(i).toString()+".ФИО is NULL)";
 
-                qDebug()<<"temp q="<<tem<<"="<<tempQ.exec(tem);
+                qDebug()<<i<<"|"<<tempQ.exec(tem)<<tem;
             }
         emit Message(1,ELanguage::getWord(STUDENT_ADD)+" "+name);
         emit ChangedBD();
@@ -260,33 +257,51 @@ void sqlDataBase::sumCount(const QString &group){
     QSqlQuery query(*this);
     while(qer->next()){
         short summ=0;
-        qDebug()<<"qer->record().count()="<<qer->record().count();
+        //qDebug()<<"qer->record().count()="<<qer->record().count();
         for(short i=2;i<qer->record().count();i++){
             summ+=qer->value(i).toInt();
         }
         QString debug="update "+group+" set sum="+QString::number(summ)+
                 " where ФИО='"+qer->value(1).toString()+"'";
-        qDebug()<<debug+" ="<<query.exec(debug);
+        query.exec(debug);
+    }
+}
+void sqlDataBase::sumCount(const QString &group, const QString &name){
+    qer->exec("select *  from "+ group+" where ФИО='"+name+"'");
+    QSqlQuery query(*this);
+    while(qer->next()){
+        short summ=0;
+        for(short i=2;i<qer->record().count();i++){
+            summ+=qer->value(i).toInt();
+        }
+        QString debug="update "+group+" set sum="+QString::number(summ)+
+                " where ФИО='"+qer->value(1).toString()+"'";
+        query.exec(debug);
     }
 }
 void sqlDataBase::sumCount(const QString &group, const QString &predmet,const int &index){
     QStringList prefix;
-    prefix<<"LC_"<<"PC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+    prefix<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
     sumCount(prefix[index]+predmet+group);
 }
-void sqlDataBase::sumCount(const QString &group, const QString &predmet){
+void sqlDataBase::sumCount(const QString &group, const QString &predmet,const int &index,const QString & name){
     QStringList prefix;
-    prefix<<"LC_"<<"PC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+    prefix<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+    sumCount(prefix[index]+predmet+group,name);
+}
+/*void sqlDataBase::sumCount(const QString &group, const QString &predmet){
+    QStringList prefix;
+    prefix<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
     for(QString i:prefix){
         sumCount(i+predmet+group);
     }
-}
+}*/
 void sqlDataBase::deleteStudent(const QString &group, const QString name){
     if(qer->exec("call deleteStudent('"+name+"','"+group+"');")){
         emit Message(1,ELanguage::getWord(STUDENT_DELETED)+" "+name);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 void sqlDataBase::deleteGrpoup(const QString &name){
@@ -294,7 +309,7 @@ void sqlDataBase::deleteGrpoup(const QString &name){
         emit Message(1,ELanguage::getWord(GROUP_DELETED)+" "+name);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 
@@ -303,7 +318,7 @@ void sqlDataBase::deletePredmet(const QString &name){
         emit Message(1,ELanguage::getWord(PREDMET_DELETED)+" "+name);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 void sqlDataBase::addPredmetGroup(const QString &gr, const QString &pred){
@@ -321,7 +336,7 @@ void sqlDataBase::addPredmetGroup(const QString &gr, const QString &pred){
         emit Message(1,ELanguage::getWord(PREDMET_ADDED)+" "+pred+"->"+gr);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_ADD_PREDMET));
     }
 }
 void sqlDataBase::removePredmetGroup(const QString &gr, const QString &pred){
@@ -329,7 +344,7 @@ void sqlDataBase::removePredmetGroup(const QString &gr, const QString &pred){
         emit Message(1,ELanguage::getWord(PREDMET_DELETED_GR)+" "+pred+"->"+gr);
         emit ChangedBD();
     }else{
-        error_msg();
+        error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 sqlDataBase::~sqlDataBase(){

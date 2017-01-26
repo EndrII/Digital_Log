@@ -15,6 +15,8 @@ QDataStream& operator<<(QDataStream&stream,const settings& object){
     stream<<object.host;
     stream<<object.port;
     stream<<object.user;
+    stream<<object.defaultDatabase;
+    stream<<object.connect;
     return stream;
 }
 QDataStream& operator>>(QDataStream&stream,settings& object){
@@ -22,6 +24,8 @@ QDataStream& operator>>(QDataStream&stream,settings& object){
     stream>>object.host;
     stream>>object.port;
     stream>>object.user;
+    stream>>object.defaultDatabase;
+    stream>>object.connect;
     return stream;
 }
 void settings::default_(){
@@ -29,12 +33,16 @@ void settings::default_(){
     user=defaultUser;
     host=defaultHost;
     port=defaultPORT;
+    defaultDatabase=defaultDDB;
+    connect=defaultConnect;
 }
 settings& settings::operator=(const settings& right){
     this->host=right.host;
     this->pass=right.pass;
     this->user=right.user;
     this->port=right.port;
+    this->defaultDatabase=right.defaultDatabase;
+    this->connect=right.connect;
     return *this;
 }
 Settings::Settings(sqlDataBase *bd, QWidget *parent):
@@ -52,6 +60,9 @@ Settings::Settings(sqlDataBase *bd, QWidget *parent):
     hboxl->addWidget(new QLabel(ELanguage::getWord(USER_PASSS)));
     hboxl->addWidget(new QLabel(ELanguage::getWord(USER_HOST)));
     hboxl->addWidget(new QLabel(ELanguage::getWord(USER_PORT)));
+    hboxl->addWidget(new QLabel(ELanguage::getWord(DEFAULT_DATABASE)));
+    hboxl->addWidget(new QLabel(ELanguage::getWord(AUTO_CONNECT)));
+
 
     Login=new QLineEdit(conf.user);
     hboxr->addWidget(Login);
@@ -66,6 +77,13 @@ Settings::Settings(sqlDataBase *bd, QWidget *parent):
 
     port=new QLineEdit(conf.port);
     hboxr->addWidget(port);
+
+    defaultDataBase=new QLineEdit(conf.defaultDatabase);
+    hboxr->addWidget(defaultDataBase);
+
+    autoConnect=new QCheckBox();
+    autoConnect->setCheckState((Qt::CheckState)(conf.connect*2));
+    hboxr->addWidget(autoConnect);
 
     QHBoxLayout *hbox=new QHBoxLayout();
     cancle=new QPushButton(ELanguage::getWord(BUTTON_CANCLE));
@@ -112,6 +130,8 @@ void Settings::complitClick(bool){
     conf.pass=pass->text();
     conf.host=host->text();
     conf.port=port->text();
+    conf.defaultDatabase=defaultDataBase->text();
+    conf.connect=autoConnect->isChecked();
     Settings::writeConf(&conf);
     Bd->connect_to(conf.user,conf.pass,conf.host,conf.port);
     this->close();
@@ -122,14 +142,8 @@ void Settings::defaultClick(bool){
     port->setText(conf.port);
     Login->setText(conf.user);
     pass->setText(conf.pass);
-
-    Bd->Query_no_update("update config_flags "
-                        "set flag=0 where id=1");
-    Bd->Query_no_update("update config_flags "
-                        "set flag=1 where id=2");
-    Bd->Query_no_update("update config_flags "
-                        "set flag=6 where id=3");
-    //update();
+    defaultDataBase->setText(conf.defaultDatabase);
+    autoConnect->setCheckState((Qt::CheckState)(conf.connect*2));
 }
 void Settings::cancleClick(bool){
     this->close();

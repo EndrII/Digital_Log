@@ -15,6 +15,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    //CSS::ReadCss(this,"://ccs/StyleProgramm.css");
     grm=NULL;
     conf=Settings::readConf();
     QVBoxLayout *temp=new QVBoxLayout();
@@ -42,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(bd,SIGNAL(Message(int,QString)),this,SLOT(Error(int,QString)));
     connect(bd,SIGNAL(stateChanged(state_BD)),this,SLOT(stateChanged(state_BD)));
     createMenu();
+    if(conf.connect){
+        connect_bd(false);
+    }
 }
 void MainWindow::createMenu(){
     file=new QMenu(ELanguage::getWord(FILE_MENU),this);
@@ -121,6 +125,9 @@ void MainWindow::toArhiv(bool){
 void MainWindow::connect_bd(bool){
     conf= Settings::readConf();
     bd->connect_to(conf.user,conf.pass,conf.host,conf.port);
+    if(!conf.defaultDatabase.isEmpty()){
+        bd->openDB(conf.defaultDatabase);
+    }
 }
 
 

@@ -13,7 +13,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DigitalLog
 TEMPLATE = app
-VERSION = 1.0.4.0
+VERSION = 1.1.0.0
 TEMPLATE = app
 QMAKE_TARGET_COMPANY = Yankovich Andrei
 QMAKE_TARGET_PRODUCT = DigitalLog
@@ -46,7 +46,9 @@ SOURCES += main.cpp\
     DateMaster.cpp \
     PrinterDialog.cpp \
     MySqlQueryColorModel.cpp \
-    LimitWorksWidget.cpp
+    LimitWorksWidget.cpp \
+    SpaceEngineComponents/System/css.cpp \
+    group.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -74,7 +76,9 @@ HEADERS  += mainwindow.h \
     DateMaster.h \
     PrinterDialog.h \
     MySqlQueryColorModel.h \
-    LimitWorksWidget.h
+    LimitWorksWidget.h \
+    SpaceEngineComponents/System/css.h \
+    group.h
 
 FORMS += \
     form.ui
@@ -86,4 +90,5 @@ RESOURCES += \
 DISTFILES += \
     sql/CreateDataBase.sql \
     sql/запросы.sql \
-    sql/списки.sql
+    sql/списки.sql \
+    ccs/StyleProgramm.css

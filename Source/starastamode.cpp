@@ -19,6 +19,7 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     beginRange->setDisplayFormat("dd.MM.yyyy");
     endRange=new QDateEdit(QDate::currentDate());
     endRange->setDisplayFormat("dd.MM.yyyy");
+//    save=new QPushButton(ELanguage::getWord(BUTTON_SAVE));
     print_=new QPushButton(ELanguage::getWord(PRINT));
     print_->setShortcut(Qt::Key_Print);
     limit=new QSpinBox();
@@ -29,20 +30,45 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     model->setQuery(*qyer);
     table->setModel(model);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    showCritikal=new QCheckBox(ELanguage::getWord(SHOW_CRITICAL));showCritikal->setCheckState(Qt::Checked);
+    showWarning=new QCheckBox(ELanguage::getWord(SHOW_WARNING));showWarning->setCheckState(Qt::Checked);
+    showNormal=new QCheckBox(ELanguage::getWord(SHOW_NORMAL));showNormal->setCheckState(Qt::Checked);
     //sort=new QComboBox();
     this->setMinimumSize(800,480);
     createContextMenu();
     QVBoxLayout *box=new QVBoxLayout();
     QHBoxLayout *list=new QHBoxLayout();
-    list->addWidget(groups);
-    list->addWidget(new QLabel(ELanguage::getWord(DATE_RANGE)+" "+ELanguage::getWord(BEGIN)+":"));
-    list->addWidget(beginRange);
-    list->addWidget(new QLabel(ELanguage::getWord(END)+":"));
-    list->addWidget(endRange);
-    list->addWidget(print_);
-    list->addWidget(limit);
+    QVBoxLayout *stack=new QVBoxLayout();
+    stack->addWidget(showNormal);
+    stack->addWidget(showWarning);
+    stack->addWidget(showCritikal);
+    list->addLayout(stack);
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(BUTTON_GROUP)));
+    stack->addWidget(groups);
+ //   stack->addWidget(save);
+    list->addLayout(stack);
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(DATE_RANGE)));
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(BEGIN)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(beginRange);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(END)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(endRange);
+    list->addLayout(stack);
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(LIMIT_TITLE)));
+    stack->addWidget(limit);
+    stack->addWidget(print_);
+    list->addLayout(stack);
     box->addLayout(list);
+
     box->addWidget(table);
+    bar=new QProgressBar();
+    bar->setMinimum(0);
+    bar->setVisible(false);
+  //  box->addWidget(bar);
     this->setLayout(box);
     connect(bd,SIGNAL(ChangedBD()),this,SLOT(updateGroups()));
     connect(print_,SIGNAL(clicked(bool)),this,SLOT(PrintClick()));
@@ -50,6 +76,13 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     connect(beginRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(endRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(groups,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
+    connect(showNormal,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
+    connect(showWarning,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
+    connect(showCritikal,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
+  //  connect((MySqlQueryColorModel*)model,SIGNAL(tableSaveProgress(int)),bar,SLOT(setValue(int)));
+   // connect(save,SIGNAL(clicked(bool)),(MySqlQueryColorModel*)model,SLOT(save()));
+   // connect((MySqlQueryColorModel*)model,SIGNAL(SavesChanged(int)),SLOT(saveStateChanged(int)));
+   // connect((MySqlQueryColorModel*)model,SIGNAL(startSave(int)),bar,SLOT(setMaximum(int)));
     //connect(table->selectionModel(),SIGNAL(currentColumnChanged(QModelIndex,QModelIndex)),SLOT(sortChanged(QModelIndex,QModelIndex)));
 }
 void StarastaMode::updateTable(const short &index,bool DESC){
@@ -65,9 +98,20 @@ void StarastaMode::updateTable(const short &index,bool DESC){
         q+=",sum as '"+ELanguage::getWord(SUMM)+"'";
         listColumnHaider.push_back("sum");
     }
-    q+=" from "+groups->currentText()+" ORDER BY "+listColumnHaider[index]+((DESC)?" DESC ":"");
+
+    q+=" from "+groups->currentText();
+    if(!showNormal->isChecked()){
+        q+=" where sum >= "+QString::number(limit->value()/2);
+    }
+    if(!showWarning->isChecked()){
+        q+=" where (sum <"+QString::number(limit->value()/2)+" or  sum>="+QString::number(limit->value())+")";
+    }
+    if(!showCritikal->isChecked()){
+        q+=" where NOT sum>= "+QString::number(limit->value());
+    }
+    q+=" ORDER BY "+listColumnHaider[index]+((DESC)?" DESC ":"");
     ((MySqlQueryColorModel*)model)->setLimit(limit->value());
-    qyer->exec(q);
+    qDebug()<<qyer->exec(q)<<q;
     model->setQuery(*qyer);
 }
 void StarastaMode::updateGroups(){
@@ -113,11 +157,14 @@ void StarastaMode::Enter(){
                                       " "+tempName,
                                       0,0,56,1,&ok);
     if(ok){
-        QString temp_data;
+        QString temp_data,q;
         temp_data=QDate::fromString(model->headerData(indexColumn,Qt::Horizontal).toString(),"dd.MMMM.yyyy").toString("yyyy_MM_dd");
-        qyer->exec("UPDATE "+groups->currentText()+" SET "+temp_data+"="+QString::number(tempData)+" "
-                   "WHERE ФИО='"+tempName+"'");
-        bd->sumCount(groups->currentText());
+        q="UPDATE "+groups->currentText()+" SET "+temp_data+"="+QString::number(tempData)+" WHERE ФИО='"+tempName+"'";
+        StackItem temp_i;
+        temp_i.Group=groups->currentText();
+        temp_i.qyer=q;
+        qyer->exec(q);
+        bd->sumCount(groups->currentText(),model->data(model->index(indexRow,0)).toString());
         updateTable();
         if(++indexRow>=model->rowCount()){
             indexColumn++;
@@ -125,6 +172,14 @@ void StarastaMode::Enter(){
         }
         table->selectionModel()->setCurrentIndex(model->index(indexRow,indexColumn),QItemSelectionModel::Select);
     }
+}
+void StarastaMode::filterUpdate(){
+
+}
+void StarastaMode::saveStateChanged(int i){
+    save->setEnabled(i);
+    save->setText(ELanguage::getWord(BUTTON_SAVE)+"("+QString::number(i)+")");
+    bar->setVisible(i);
 }
 void StarastaMode::sortTableU(){
     updateTable(table->selectionModel()->currentIndex().column());

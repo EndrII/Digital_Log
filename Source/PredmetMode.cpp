@@ -19,7 +19,9 @@ PredmetMode::PredmetMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     times=new QComboBox();
     print_=new QPushButton(ELanguage::getWord(PRINT));
     print_->setShortcut(Qt::Key_Print);
-
+    showCritikal=new QCheckBox(ELanguage::getWord(SHOW_CRITICAL));showCritikal->setCheckState(Qt::Checked);
+    showWarning=new QCheckBox(ELanguage::getWord(SHOW_WARNING));showWarning->setCheckState(Qt::Checked);
+    showNormal=new QCheckBox(ELanguage::getWord(SHOW_NORMAL));showNormal->setCheckState(Qt::Checked);
     //change=new QPushButton(ELanguage::getWord(LIMIT));
     limit_LC=new QSpinBox();
     limit_PC=new QSpinBox();
@@ -55,20 +57,65 @@ PredmetMode::PredmetMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     createContextMenu();
     QVBoxLayout *box=new QVBoxLayout();
     QHBoxLayout *list=new QHBoxLayout();
-    list->addWidget(groups);
-    list->addWidget(predmets);
-    list->addWidget(times);
-    list->addWidget(prefix);
-    list->addWidget(beginRangeL);
-    list->addWidget(beginRange);
-    list->addWidget(endRangeL);
-    list->addWidget(endRange);
-    list->addWidget(print_);
-    list->addWidget(norma);
-    list->addWidget(limit_LC);
-    list->addWidget(limit_PC);
-    list->addWidget(limit_KRC);
-    list->addWidget(limit_RGRC);
+    QVBoxLayout *stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(FILTERS)));
+    stack->addWidget(showNormal);
+    stack->addWidget(showWarning);
+    stack->addWidget(showCritikal);
+    list->addLayout(stack);
+
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(SELECTOR)));
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(BUTTON_GROUP)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(groups);
+    list->addLayout(stack);
+
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(PREDMET_MOD)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(predmets);
+    list->addLayout(stack);
+
+
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(DATE_MODE)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(times);
+    list->addLayout(stack);
+
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(WORK)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(prefix);
+    list->addLayout(stack);
+
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(DATE_RANGE)));
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(BEGIN)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(beginRange);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(END)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(endRange);
+    stack->addWidget(print_);
+    list->addLayout(stack);
+
+    stack=new QVBoxLayout();
+    stack->addWidget(new QLabel(ELanguage::getWord(PLAN_WORK_NOW)));
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(NORMA_YAHR)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(norma);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(LC_WORKS)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(limit_LC);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(PC_WORKS)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(limit_PC);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(KRC_WORKS)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(limit_KRC);
+    stack->addLayout(new QHBoxLayout());
+    ((QHBoxLayout*)stack->children().back())->addWidget(new QLabel(ELanguage::getWord(RGRC_WORKS)+":"));
+    ((QHBoxLayout*)stack->children().back())->addWidget(limit_RGRC);
+    list->addLayout(stack);
     box->addLayout(list);
     box->addWidget(table);
     this->setLayout(box);
@@ -85,6 +132,9 @@ PredmetMode::PredmetMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     connect(beginRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(endRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(norma,SIGNAL(clicked(bool)),SLOT(normaClick()));
+    connect(showNormal,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
+    connect(showWarning,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
+    connect(showCritikal,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
 }
 void PredmetMode::updateGroups(){
     groups->clear();
@@ -158,39 +208,55 @@ void PredmetMode::updateTable(const QString& name,const short index, bool DESC){
         //table->repaint();
         listColumnHaider.push_back("sum");
     }
+    QSpinBox * tempSpin;
         switch (prefix->currentIndex()) {
         case 0:
             q+=" from LC_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_LC->value()*full,LC_,true);
+            tempSpin=limit_LC;
             break;
         case 1:
             q+=" from PC_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_PC->value()*full,PC_,true);
+            tempSpin=limit_PC;
             break;
         case 2:
             q+=" from KRC_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_KRC->value()*full,KRC_,true);
+            tempSpin=limit_KRC;
             break;
         case 3:
             q+=" from RGRC_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_RGRC->value()*full,RGRC_,true);
+            tempSpin=limit_RGRC;
             break;
         case 4:
             q+=" from LD_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_LC->value()*full,LC_,true);
+            tempSpin=limit_LC;
             break;
         case 5:
             q+=" from KRD_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_KRC->value()*full,KRC_,true);
+            tempSpin=limit_KRC;
             break;
         case 6:
             q+=" from RGRD_"+name;
             ((MySqlQueryColorModelU*)model)->setLimit(limit_RGRC->value()*full,RGRC_,true);
+            tempSpin=limit_RGRC;
             break;
         default:
             break;
         }
-
+        if(!showNormal->isChecked()){
+            q+=" where sum <= "+QString::number(tempSpin->value());
+        }
+        if(!showWarning->isChecked()){
+            q+=" where NOT(sum <"+QString::number(tempSpin->value())+" and  sum>="+QString::number(tempSpin->value()/2)+")";
+        }
+        if(!showCritikal->isChecked()){
+            q+=" where NOT sum< "+QString::number(tempSpin->value()/2);
+        }
     q+=" ORDER BY "+listColumnHaider[index]+((DESC)?" DESC ":"");
 
     qDebug()<<qyer->exec(q)<<q;
@@ -209,26 +275,48 @@ void PredmetMode::updateLimits(){
     limit_RGRC->setValue(bd->getGroupLimit(groups->currentText(),"RGRC_",predmets->currentText())*k);
 }
 void PredmetMode::updateTable(const QString& name,const QString&time){
-    qyer->exec("select "+
-               groups->currentText()+".ФИО as '"+ELanguage::getWord(LABS_V)+"', "+
-               "LC_"+name+"."+time+" as '"+ELanguage::getWord(LABS_V)+"', "+
-               "PC_"+name+"."+time+" as '"+ELanguage::getWord(PRACT_V)+"', "+
-               "KRC_"+name+"."+time+" as '"+ELanguage::getWord(KONTR_V)+"', "+
-               "RGRC_"+name+"."+time+" as '"+ELanguage::getWord(RGR_V)+"', "+
-               "LD_"+name+"."+time+" as '"+ELanguage::getWord(LABS_Z)+"', "+
-               "KRD_"+name+"."+time+" as '"+ELanguage::getWord(KONTR_Z)+"', "+
-               "RGRD_"+name+"."+time+" as '"+ELanguage::getWord(RGR_Z)+"' "
-               "from "+
-               groups->currentText()+",LC_"+name+","+"PC_"+name+","+"KRC_"+name+","+
-             "RGRC_"+name+","+"LD_"+name+","+"KRD_"+name+","+"RGRD_"+name+" "+
-               "where "+
-                groups->currentText()+".ФИО="+"LC_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"PC_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"KRC_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"RGRC_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"LD_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"KRD_"+name+".ФИО AND "+
-                groups->currentText()+".ФИО="+"RGRD_"+name+".ФИО ");
+    QString q="select "+
+            groups->currentText()+".ФИО as '"+ELanguage::getWord(NAME)+"', "+
+            "PC_"+name+"."+time+" as '"+ELanguage::getWord(PRACT_V)+"', "+
+            "LC_"+name+"."+time+" as '"+ELanguage::getWord(LABS_V)+"', "+
+            "KRC_"+name+"."+time+" as '"+ELanguage::getWord(KONTR_V)+"', "+
+            "RGRC_"+name+"."+time+" as '"+ELanguage::getWord(RGR_V)+"', "+
+            "LD_"+name+"."+time+" as '"+ELanguage::getWord(LABS_Z)+"', "+
+            "KRD_"+name+"."+time+" as '"+ELanguage::getWord(KONTR_Z)+"', "+
+            "RGRD_"+name+"."+time+" as '"+ELanguage::getWord(RGR_Z)+"' "
+            "from "+
+            groups->currentText()+",LC_"+name+","+"PC_"+name+","+"KRC_"+name+","+
+          "RGRC_"+name+","+"LD_"+name+","+"KRD_"+name+","+"RGRD_"+name+" "+
+            "where "+
+             groups->currentText()+".ФИО="+"LC_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"PC_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"KRC_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"RGRC_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"LD_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"KRD_"+name+".ФИО AND "+
+             groups->currentText()+".ФИО="+"RGRD_"+name+".ФИО ";
+    if(!showNormal->isChecked()){
+        q+=" and( LC_"+name+"."+time+"<"+QString::number(limit_LC->value())+
+           " or PC_"+name+"."+time+"<"+QString::number(limit_PC->value())+
+           " or KRC_"+name+"."+time+"<"+QString::number(limit_KRC->value())+
+           " or RGRC_"+name+"."+time+"<"+QString::number(limit_RGRC->value())+
+           " or LD_"+name+"."+time+"<"+QString::number(limit_LC->value())+
+           " or KRD_"+name+"."+time+"<"+QString::number(limit_KRC->value())+
+           " or RGRD_"+name+"."+time+"<"+QString::number(limit_RGRC->value())+") ";
+    }
+    if(!showWarning->isChecked()){
+        q+=" and NOT(LD_"+name+"."+time+"<"+QString::number(limit_LC->value())+
+           " or KRD_"+name+"."+time+"<"+QString::number(limit_KRC->value())+
+           " or RGRD_"+name+"."+time+"<"+QString::number(limit_RGRC->value())+") ";
+    }
+    if(!showCritikal->isChecked()){
+        q+=" and NOT(LC_"+name+"."+time+"<"+QString::number(limit_LC->value())+
+           " or PC_"+name+"."+time+"<"+QString::number(limit_PC->value())+
+           " or KRC_"+name+"."+time+"<"+QString::number(limit_KRC->value())+
+           " or RGRC_"+name+"."+time+"<"+QString::number(limit_RGRC->value())+") ";
+    }
+    qDebug()<<q<<qyer->exec(q);
+
     ((MySqlQueryColorModelU*)model)->setLimit(limit_LC->value(),LC_);
     ((MySqlQueryColorModelU*)model)->setLimit(limit_PC->value(),PC_);
     ((MySqlQueryColorModelU*)model)->setLimit(limit_KRC->value(),KRC_);
@@ -244,13 +332,17 @@ void PredmetMode::Enter(){
                                       "("+model->headerData(indexColumn,Qt::Horizontal).toString()+") "+
                                       tempName,0,0,56,1,&ok);
     if(ok){
+        if(indexColumn>4&&tempData>model->data(model->index(indexRow,indexColumn-3)).toInt()){
+            QMessageBox::warning(this,ELanguage::getWord(WARNING),ELanguage::getWord(WRITE_WRONG));
+            return;
+        }
         QStringList prefix;
-        prefix<<"NONE"<<"LC_"<<"PC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
+        prefix<<"NONE"<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
         QString name=predmets->currentText()+groups->currentText();
         QString time=times->currentText().replace('-','_');
         qyer->exec("UPDATE "+prefix[table->currentIndex().column()]+name+" "
                    "SET "+time+"="+QString::number(tempData)+" WHERE ФИО='"+tempName+"'");
-        bd->sumCount(groups->currentText(),predmets->currentText(),indexColumn-1);
+        bd->sumCount(groups->currentText(),predmets->currentText(),indexColumn-1,model->data(model->index(indexRow,0)).toString());
         updateTable(name,time);
         if(++indexRow>=model->rowCount()){
             indexColumn++;
@@ -267,6 +359,15 @@ void PredmetMode::sortTableU(){
 }
 void PredmetMode::sortTableD(){
     updateTable(predmets->currentText()+groups->currentText(),table->selectionModel()->currentIndex().column(),true);
+}
+void PredmetMode::filterUpdate(){
+    QString name=predmets->currentText()+groups->currentText();
+    QString time=times->currentText().replace('-','_');
+    if(times->currentIndex()){
+        updateTable(name,time);
+    }else{
+        updateTable(name);
+    }
 }
 void PredmetMode::createContextMenu(){
     sortUP=new QAction(ELanguage::getWord(SORT_UP));

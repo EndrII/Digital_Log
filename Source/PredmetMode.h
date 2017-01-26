@@ -31,11 +31,14 @@
 #include "PrinterDialog.h"
 #include <QDateEdit>
 #include "LimitWorksWidget.h"
+#include "MySqlQueryColorModel.h"
 class PredmetMode : public QWidget
 {
     Q_OBJECT
 private:
     sqlDataBase *bd;
+    QCheckBox * showCritikal,*showWarning,*showNormal;
+
     QAnimationGroup *menu;
     QSqlQuery *qyer;
     QSqlQueryModel *model;
@@ -71,6 +74,7 @@ private slots:
     void normaClick();
     void sortTableU();
     void sortTableD();
+    void filterUpdate();
     void keyPressEvent(QKeyEvent* event);
     void ComboWrite(int);
     void updateGroups();

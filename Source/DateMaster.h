@@ -7,6 +7,7 @@
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QAction>
 #include <QHBoxLayout>
 #include <QTableView>
@@ -26,16 +27,20 @@ private:
     QProgressBar *bar;
     QString tableTimeName;
     sqlDataBase *database;
-    QTabWidget *modeTab;
+    QCheckBox *EvriMouth;
+    QLabel *interval;
+   // QTabWidget *modeTab;
     QPushButton * ok,*cancel;
     QDateEdit *BeginDate,*EndDate;
     QTableView *dayNames;
-    QSpinBox *intervalFromMode1,*numberFirstDate;
+    QDate lastDate;
+    QSpinBox *intervalFromMode1;
 private slots:
     void cancle_(bool);
     void ok_(bool);
+    void stateChange(int);
 public:
-    DateMaster(sqlDataBase *bd,const QString& tablename,QWidget * ptr=NULL);
+    DateMaster(sqlDataBase *bd,const QString& tablename,const QDate &last,QWidget * ptr=NULL);
     ~DateMaster();
 };
 

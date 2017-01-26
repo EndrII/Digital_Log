@@ -14,6 +14,7 @@
 
 #include <QDialog>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QLabel>
 #include "sqldatabase.h"
@@ -31,12 +32,16 @@
 #define defaultUser "user"
 #define defaultHost "localhost"
 #define defaultPORT "3306"
+#define defaultDDB ""
+#define defaultConnect false;
 #define defaultPatchFromConfFile "./settings/conf.cfg"
 struct settings{
     QString pass;
     QString port;
     QString user;
     QString host;
+    QString defaultDatabase;
+    bool connect;
     void default_();
     friend QDataStream& operator<<(QDataStream&stream,const settings& object);
     friend QDataStream& operator>>(QDataStream&stream,settings& object);
@@ -49,7 +54,8 @@ private:
     settings conf;
     sqlDataBase *Bd;
     QPushButton *complit,*default_,*cancle;
-    QLineEdit *Login,*pass,*host,*port;
+    QLineEdit *Login,*pass,*host,*port,*defaultDataBase;
+    QCheckBox *autoConnect;
 protected:
     static void writeConf(settings* conf,const QString& patch=defaultPatchFromConfFile);
 private slots:

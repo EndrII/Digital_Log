@@ -38,11 +38,19 @@ DateEditor::DateEditor(sqlDataBase *database, QWidget *ptr):
     connect(autoU,SIGNAL(clicked(bool)),this,SLOT(DateMasterU(bool)));
 }
 void DateEditor::DateMasterP(bool){
-    (new DateMaster(db,"времяПропуски",this))->exec();
+    if(modelP->rowCount()>0){
+        (new DateMaster(db,"времяПропуски",modelP->data(modelP->index(modelP->rowCount()-1,0)).toDate(),this))->exec();
+    }else{
+        (new DateMaster(db,"времяПропуски",QDate(),this))->exec();
+    }
     updateTables();
 }
 void DateEditor::DateMasterU(bool){
-    (new DateMaster(db,"времяУроки",this))->exec();
+    if(modelU->rowCount()>0){
+        (new DateMaster(db,"времяУроки",modelU->data(modelU->index(modelU->rowCount()-1,0)).toDate(),this))->exec();
+    }else{
+        (new DateMaster(db,"времяУроки",QDate(),this))->exec();
+    }
     updateTables();
 }
 void DateEditor::updateTables(){
@@ -67,6 +75,12 @@ void DateEditor::AddDate_(bool){
         ok.remove(' ');
         if(ok.isEmpty())
             return;
+        if(modelP->rowCount()>0 &&
+           (QDate::fromString(ok,"dd.MM.yyyy")<modelP->data(modelP->index(modelP->rowCount()-1,0)).toDate()||
+           QDate::fromString(ok,"dd.MM.yyyy")<QDate::currentDate())){
+                QMessageBox::information(this,ELanguage::getWord(ERROR),ELanguage::getWord(ERROR_DATE_BACK));
+                return;
+        }
         q+=ok;
         q+="', '%d.%m.%Y'))";
         qDebug()<<q<<" result="<<qyerP->exec(q);
@@ -77,10 +91,22 @@ void DateEditor::AddDate_(bool){
                                   "(SELECT @number_:= 0) as tbl);");
     }
     if(this->focusWidget()==tableU){
-        QString q="INSERT INTO времяУроки(Даты) VALUES (STR_TO_DATE('"+
-                QInputDialog::getText(this,ELanguage::getWord(DATE_P),
-                                      ELanguage::getWord(DATE_P_ABOUT))+
-                                      "', '%d.%m.%Y'))";
+        QString q="INSERT INTO времяУроки(Даты) VALUES (STR_TO_DATE('";
+        QString ok;
+        ok= QInputDialog::getText(this,ELanguage::getWord(DATE_U),
+                              ELanguage::getWord(DATE_U_ABOUT));
+        ok.remove(' ');
+        if(ok.isEmpty())
+            return;
+        if(modelU->rowCount()>0 &&
+           (QDate::fromString(ok,"dd.MM.yyyy")<modelU->data(modelU->index(modelU->rowCount()-1,0)).toDate()||
+            QDate::fromString(ok,"dd.MM.yyyy")<QDate::currentDate())){
+                QMessageBox::information(this,ELanguage::getWord(ERROR),ELanguage::getWord(ERROR_DATE_BACK));
+                return;
+        }
+
+        q+=ok;        q+="', '%d.%m.%Y'))";
+
         qDebug()<<q<<" result="<<qyerU->exec(q);
         qyerU->exec("select Даты  from времяУроки");
         modelU->setQuery(*qyerU);
@@ -92,6 +118,7 @@ void DateEditor::AddDate_(bool){
 void DateEditor::deleteDate_(bool){
     if(this->focusWidget()==tableP){
         for(QModelIndex index :tableP->selectionModel()->selectedRows()){
+            if(tableP->model()->data(index).toDate()>QDate::currentDate())
             qyerP->exec("DELETE FROM времяПропуски WHERE Даты='"+
                         tableP->model()->data(index).toString()+"'");
         }
@@ -100,6 +127,7 @@ void DateEditor::deleteDate_(bool){
     }
     if(this->focusWidget()==tableU){
         for(QModelIndex index :tableU->selectionModel()->selectedRows()){
+            if(tableU->model()->data(index).toDate()>QDate::currentDate())
             qyerU->exec("DELETE FROM времяУроки WHERE Даты='"+
                         tableU->model()->data(index).toString()+"'");
         }

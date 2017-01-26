@@ -21,6 +21,7 @@
 #include "sqldatabase.h"
 #include <QLabel>
 #include <QMenu>
+#include <QCheckBox>
 #include <QVector>
 #include <QAction>
 #include <QInputDialog>
@@ -28,15 +29,17 @@
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QDateEdit>
+#include "MySqlQueryColorModel.h"
 #include "MounthDialog.h"
 #include "PrinterDialog.h"
 #include <QKeyEvent>
-
+#include <QProgressBar>
 class StarastaMode : public QWidget
 {
     Q_OBJECT
 private:
     void ComboWrite();
+    QCheckBox * showCritikal,*showWarning,*showNormal;
     QStringList listColumnHaider;
     sqlDataBase *bd;
     QAction *sortUP,*sortDOWN,*enter;
@@ -44,7 +47,8 @@ private:
     QSqlQueryModel *model;
     QComboBox *groups;
     QDateEdit *beginRange,*endRange;
-    QPushButton *print_;
+    QPushButton *print_,*save;
+    QProgressBar *bar;
     QSpinBox *limit;
     //QPushButton *change;
     //QPushButton *remove;
@@ -55,10 +59,12 @@ public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
+    void saveStateChanged(int);
     //void sortChanged(QModelIndex, QModelIndex);
     void Enter();
     void sortTableU();
     void sortTableD();
+    void filterUpdate();
     void updateTable(const short &index=0,bool DESC=false);
     void keyPressEvent(QKeyEvent* event);
     void updateGroups();

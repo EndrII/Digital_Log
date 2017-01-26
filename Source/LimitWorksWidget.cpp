@@ -52,6 +52,7 @@ void LimitWorksWidget::clickOk(){
     bd_->setGroupLimit(group_,"PC_",predmet_,PC->value());
     bd_->setGroupLimit(group_,"KRC_",predmet_,KRC->value());
     bd_->setGroupLimit(group_,"RGRC_",predmet_,RGRC->value());
+    this->close();
 }
 LimitWorksWidget::~LimitWorksWidget(){
 

@@ -32,6 +32,7 @@
 #include "DateEditor.h"
 #include <QDebug>
 #include "help.h"
+#include "SpaceEngineComponents/System/css.h"
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
