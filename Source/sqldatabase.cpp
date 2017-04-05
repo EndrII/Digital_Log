@@ -347,6 +347,60 @@ void sqlDataBase::removePredmetGroup(const QString &gr, const QString &pred){
         error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
+QSqlQuery * sqlDataBase::getQuery(){
+    return qer;
+}
+bool sqlDataBase::writeTableModel(const QString &tableName ,const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
+    for(int r=0;r<model->rowCount();r++){
+        for(int c=0;model->columnCount();c++){
+            if(!writeLine(tableName,columnData,rowData,valueData,
+                      model->headerData(c,Qt::Horizontal).toString(),
+                      model->headerData(r,Qt::Vertical).toString(),
+                      model->data(model->index(c,r)).toString()))
+                return false;
+        }
+    }
+    return true;
+} // this function not tested !!!!
+bool sqlDataBase:: writeLine(const QString& tableName, const QString &column, const QString &row, const QString& value, const QString& columnData, const QString& rowData, const QString& valueData){
+    bool okColumn,okRow,okVal;
+    columnData.toInt(&okColumn);
+    rowData.toInt(&okRow);
+    valueData.toInt(&okVal);
+    if(qer->exec(QString("INSERT INTO %0(%1,%2,%3) VALUE(%4,%5,%6)").arg(
+                      tableName,column,row,value,(okColumn)?columnData:"'"+columnData+"'",
+                      (okRow)?rowData:"'"+rowData+"'",(okVal)?valueData:"'"+valueData+"'"))){
+        return true;
+    }else{
+        return qer->exec(QString("UPDATE %0 SET %3=%6 WHERE %1=%4 AND %2=%5").arg(
+                             tableName,column,row,value,(okColumn)?columnData:"'"+columnData+"'",
+                             (okRow)?rowData:"'"+rowData+"'",(okVal)?valueData:"'"+valueData+"'"));
+    }
+    return false;
+}// this function not tested !!!!
+
+bool sqlDataBase::transformQuery(const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
+    if(qer->record().indexOf(columnData)>=0&&qer->record().indexOf(rowData)>=0&&qer->record().indexOf(valueData)){
+        model->clear();
+        qer->seek(0);
+        while(qer->next()){
+            int searchRow=0,searchColumn=0;
+            while(searchColumn<model->columnCount()&&model->headerData(searchColumn++,Qt::Horizontal)!=qer->value(columnData));
+            if(searchColumn==model->columnCount()){
+                model->appendColumn(QList<QStandardItem*>());
+                model->setHeaderData(model->columnCount(),Qt::Horizontal,qer->value(columnData));
+            }
+            while(searchRow<model->rowCount()&&model->headerData(searchRow++,Qt::Vertical)!=qer->value(rowData));
+            if(searchRow==model->rowCount()){
+                model->appendRow(QList<QStandardItem*>());
+                model->setHeaderData(model->rowCount(),Qt::Vertical,qer->value(rowData));
+            }
+            model->setData(model->index(searchRow,searchColumn),qer->value(valueData),Qt::EditRole);
+        }
+        return true;
+    }
+    return false;
+}
 sqlDataBase::~sqlDataBase(){
     delete qer;
     delete model;

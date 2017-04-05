@@ -136,5 +136,5 @@
 #define INTERVAL 133
 #define FIRST_DATE 134
 #define SELECT_DEYS 135
-
+#define EDATA_BASES 136
 #endif // LANGUAGEINDEX_H

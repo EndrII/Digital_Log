@@ -9,9 +9,10 @@ DataBasesMenager::DataBasesMenager(sqlDataBase *_bd, QWidget *ptr):
     box->addWidget(new QLabel(ELanguage::getWord(DATA_BASES_LIST)));
     ListdataBases =new QTableView();
     ListdataBases->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ListdataBases->setModel(bd->getModel());
-    bd->Query("show databases;");
-    //ListdataBases->setHidden();
+    model= new QStandardItemModel(0,1);
+    model->setHeaderData(0,Qt::Horizontal,ELanguage::getWord(EDATA_BASES));
+    ListdataBases->setModel(model);
+    showDataBases();
     box->addWidget(ListdataBases);
     QHBoxLayout *line=new QHBoxLayout();
     Cancle=new QPushButton(ELanguage::getWord(BUTTON_CANCLE));
@@ -35,6 +36,20 @@ DataBasesMenager::DataBasesMenager(sqlDataBase *_bd, QWidget *ptr):
 void DataBasesMenager::cancleClick(bool){
     this->close();
 }
+void DataBasesMenager::showDataBases(){
+    bd->Query("show databases;");
+    while(bd->getQuery()->next()){
+        if(bd->getQuery()->value(0).toString()!="information_schema"&&
+                bd->getQuery()->value(0).toString()!="mysql"&&
+                bd->getQuery()->value(0).toString()!="performance_schema"&&
+                bd->getQuery()->value(0).toString()!="sys"){
+            model->insertRow(0);
+            model->setData(model->index(0,0),bd->getQuery()->value(0),Qt::EditRole);
+        }
+
+    }
+
+}
 void DataBasesMenager::white(bool b){
     Ok->setEnabled(b);
     Create->setEnabled(b);
@@ -48,15 +63,18 @@ void DataBasesMenager::deleteClick(bool){
         white(false);
         for(QModelIndex index :ListdataBases->selectionModel()->selectedRows()){
             bd->Query("drop database "+ListdataBases->model()->data(index).toString());
+            model->removeRow(index.row());
         }
-        bd->Query("show databases;");
         white(true);
     }
 }
 void DataBasesMenager::createClick(bool){
     white(false);
-    bd->createDB(QInputDialog::getText(this,ELanguage::getWord(INPUT_BD_NAME),ELanguage::getWord(INPUT_BD_NAME_MORE)));
-    bd->Query("show databases;");
+    QString temp= QInputDialog::getText(this,ELanguage::getWord(INPUT_BD_NAME),ELanguage::getWord(INPUT_BD_NAME_MORE));
+    if(bd->createDB(temp)){
+        model->insertRow(0);
+        model->setData(model->index(0,0),temp,Qt::EditRole);
+    }
     white(true);
 }
 void DataBasesMenager::okClick(bool){
@@ -70,7 +88,7 @@ void DataBasesMenager::okClick(bool){
     }else{
         this->close();
     }
-    bd->Query("show databases;");
+    showDataBases();
 }
 DataBasesMenager::~DataBasesMenager(){
 

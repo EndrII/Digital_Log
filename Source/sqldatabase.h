@@ -6,6 +6,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
+#include <QStandardItemModel>
 #define PORT 2277
 /**
  * @brief The state_BD enum
@@ -49,6 +50,36 @@ public:
      * @brief sqlDataBase констуктор базы данных
      */
     explicit sqlDataBase();
+    /**
+     * @brief transformQuery transformation a date of the query to standartItemModel
+     * @param columnData select column of the data
+     * @param rowData select row of the data
+     * @param valueData select value from the table
+     * @return feedback
+     */
+    bool transformQuery(const QString& columnData,const QString& rowData,const QString& valueData,QStandardItemModel*);
+    /**
+     * @brief writeLine write a line into a selected table if this line created then update this
+     * @param tableName name of table
+     * @param column name of the column column
+     * @param row name of the row column
+     * @value value name of the value column
+     * @param columnData data of column
+     * @param rowData data of row
+     * @param valueData the inserted value
+     * @return return boolean
+     * @example writeLine(Graf,x,y,val,1,1,1.333);
+     */
+    bool writeLine(const QString& tableName,const QString& column,const QString& row,const QString& value,const QString& columnData,const QString& rowData,const QString& valueData);
+    /**
+     * @brief writeTableModel this function write a table into connectiondatabase;
+     * @param tableName name of table with datas
+     * @param columnData name of header of the columns
+     * @param rowData name of header of the rows
+     * @param valueData name of dataitems
+     * @return true if all done else false
+     */
+    bool writeTableModel(const QString& tableName,const QString& columnData,const QString& rowData,const QString& valueData,QStandardItemModel*);
     /**
      * @brief registration регистрация дополнительного запроса для этой базы данных
      * ПРЕДУПРЕЖДЕНИЕ - зарегистрированные запросы не отслеживаются на ошибки!
@@ -251,6 +282,8 @@ public:
      */
 
     static void removeFirstAndLastChars(const QChar item,QString& data);
+    QSqlQuery * getQuery();
+
     ~sqlDataBase();
 
 signals:

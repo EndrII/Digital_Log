@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     MySqlQueryColorModel.cpp \
     LimitWorksWidget.cpp \
     SpaceEngineComponents/System/css.cpp \
-    group.cpp
+    group.cpp \
+    TableModel.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -78,7 +79,8 @@ HEADERS  += mainwindow.h \
     MySqlQueryColorModel.h \
     LimitWorksWidget.h \
     SpaceEngineComponents/System/css.h \
-    group.h
+    group.h \
+    TableModel.h
 
 FORMS += \
     form.ui

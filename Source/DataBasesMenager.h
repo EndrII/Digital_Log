@@ -11,14 +11,18 @@
 #include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include "TableModel.h"
 class DataBasesMenager:public QDialog
 {
     Q_OBJECT
 private:
     sqlDataBase *bd;
     QTableView *ListdataBases;
+     QStandardItemModel * model;
     QPushButton *Ok,*Cancle,*Create,*Delete;
     void white(bool);
+    void showDataBases();
 private slots:
     void okClick(bool);
     void cancleClick(bool);
