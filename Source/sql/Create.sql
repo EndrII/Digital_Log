@@ -1,4 +1,4 @@
-/*version - 1.7.0*/
+/*version - 1.7.1*/
 
 create table groups(
     id int NOT NULL AUTO_INCREMENT, 
@@ -8,6 +8,18 @@ create table groups(
     expiration_date date ,
     PRIMARY KEY(id)
 )ENGINE=InnoDB CHARACTER SET=UTF8;
+
+DELIMITER |
+
+CREATE PROCEDURE update_Groups_year ()
+    NOT DETERMINISTIC
+    SQL SECURITY INVOKER
+    COMMENT 'Обновит поля групп (год обучения)'
+BEGIN
+	update groups set year=YEAR(CURDATE())-YEAR(receipt_date)+1 where expiration_date IS NULL;
+END|
+
+DELIMITER ;
 
 create table work_groups(
     id int NOT NULL AUTO_INCREMENT, 

@@ -38,6 +38,7 @@ void DataBasesMenager::cancleClick(bool){
 }
 void DataBasesMenager::showDataBases(){
     bd->Query("show databases;");
+   // model->clear();
     while(bd->getQuery()->next()){
         if(bd->getQuery()->value(0).toString()!="information_schema"&&
                 bd->getQuery()->value(0).toString()!="mysql"&&
@@ -67,6 +68,7 @@ void DataBasesMenager::deleteClick(bool){
         }
         white(true);
     }
+    //showDataBases();
 }
 void DataBasesMenager::createClick(bool){
     white(false);
@@ -83,12 +85,11 @@ void DataBasesMenager::okClick(bool){
         return ;
     }
     bd->openDB(ListdataBases->model()->data(ListdataBases->selectionModel()->selectedRows()[0]).toString());
-    if(!bd->Query_no_update("describe prefix;")){
+    if(!bd->Query_no_update("describe limits;")){
         QMessageBox::information(this,ELanguage::getWord(WARNING),ELanguage::getWord(BD_NO_ADUCATION));
     }else{
         this->close();
     }
-    showDataBases();
 }
 DataBasesMenager::~DataBasesMenager(){
 

@@ -50,13 +50,13 @@ private:
     void createMenu();
 private slots:
     void Error(int,QString);
-    void stateChanged(state_BD);
+    void stateChanged(bool);
     void about(bool);
     void help(bool);
     void setings(bool);
     void dateManager_(bool);
-    void stop_(bool);
-    void toArhiv(bool);
+   // void stop_(bool);
+   // void toArhiv(bool);
     //void AchiveOk(QString);
     void connect_bd(bool);
     void Exit(bool);

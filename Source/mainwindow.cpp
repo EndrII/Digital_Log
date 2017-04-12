@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(temp);
     this->setCentralWidget(widget);
     connect(bd,SIGNAL(Message(int,QString)),this,SLOT(Error(int,QString)));
-    connect(bd,SIGNAL(stateChanged(state_BD)),this,SLOT(stateChanged(state_BD)));
+    connect(bd,SIGNAL(stateChanged(bool)),this,SLOT(stateChanged(bool)));
     createMenu();
     if(conf.connect){
         connect_bd(false);
@@ -77,24 +77,19 @@ void MainWindow::createMenu(){
     control->addAction(stop);
     connect(stop,SIGNAL(triggered(bool)),this,SLOT(stop_(bool)));*/
 
-    toArhive=new QAction(ELanguage::getWord(ARHIVE),this);
-    control->addAction(toArhive);
-    connect(toArhive,SIGNAL(triggered(bool)),this,SLOT(toArhiv(bool)));
+    //toArhive=new QAction(ELanguage::getWord(ARHIVE),this);
+   // control->addAction(toArhive);
+   // connect(toArhive,SIGNAL(triggered(bool)),this,SLOT(toArhiv(bool)));
 }
-void MainWindow::stateChanged(state_BD stat){
-    switch (stat) {
-    case disconected:
-        state->setText("<center>"+ELanguage::getWord(OFFLINE)+"!<center>");
-        state->setMaximumHeight(20);
-        state->setStyleSheet("background-color : red;");
-        break;
-    case stoped:
+void MainWindow::stateChanged(bool stat){
+    if(stat){
         state->setText("<center>"+ELanguage::getWord(ONLINE)+"!<center>");
         state->setMaximumHeight(20);
         state->setStyleSheet("background-color : #00FA9A;");
-        break;
-    default:
-        break;
+    }else{
+        state->setText("<center>"+ELanguage::getWord(OFFLINE)+"!<center>");
+        state->setMaximumHeight(20);
+        state->setStyleSheet("background-color : red;");
     }
 }
 
@@ -116,12 +111,12 @@ void MainWindow::setings(bool){
 void MainWindow::dateManager_(bool){
    (new DateEditor(bd,this))->show();
 }
-void MainWindow::stop_(bool){
+/*void MainWindow::stop_(bool){
     bd->StopBD();
 }
 void MainWindow::toArhiv(bool){
     bd->StopBD(true);
-}
+}*/
 void MainWindow::connect_bd(bool){
     conf= Settings::readConf();
     bd->connect_to(conf.user,conf.pass,conf.host,conf.port);

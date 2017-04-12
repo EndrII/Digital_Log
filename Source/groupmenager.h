@@ -12,6 +12,7 @@
 #ifndef GROUPMENAGER_H
 #define GROUPMENAGER_H
 #include "PredmeMenager.h"
+#include <QDateEdit>
 #include <QComboBox>
 class GroupMenager : public QDialog
 {
@@ -19,6 +20,7 @@ class GroupMenager : public QDialog
 private:
     QAction *deleteStudents,*renameStudents;
     sqlDataBase *bd;
+    QDateEdit *receipt_date,*expiration_date;
     QComboBox *cb;
     QTableView *tableGroub;
     QPushButton *add,*dell,*addU,*predmets;

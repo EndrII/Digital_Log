@@ -2,20 +2,20 @@
 #define SQLDATABASE_H
 #include "core.h"
 #include <QtSql>
-#include <QSql>
+//#include <QSql>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QStandardItemModel>
 #define PORT 2277
-/**
- * @brief The state_BD enum
- * состояние базы данных
- * disconected - отключена
- * stoped - подключена, но не ведет отчет
- * conectd - подключена и ведет отчет
- */
-enum state_BD{disconected,stoped,conectd};
+// /**
+ //* @brief The state_BD enum
+// * состояние базы данных
+// * disconected - отключена
+// * stoped - подключена, но не ведет отчет
+// * conectd - подключена и ведет отчет
+// */
+//enum state_BD{disconected,conectd};
 /**
  * @brief The sqlDataBase class
  * класс упровления базами данных
@@ -25,14 +25,14 @@ class sqlDataBase:public QObject, protected QSqlDatabase{
 private:
     QStringList tempList;
     QSqlQuery *qer;
-    state_BD state;
+    bool state;
     QSqlQueryModel *model;
 private slots:
 protected:
-    /**
-     * @brief stateChang проверка состояния базы данных.
-     */
-    void stateChang();
+   // /**
+ //    * @brief stateChang проверка состояния базы данных.
+   //  */
+   // void stateChang();
     /**
      * @brief error_msg
      * выброс сообщения об ошибке
@@ -90,7 +90,7 @@ public:
      * @brief GetState
      * @return вернет статус базы данных
      */
-    state_BD GetState();
+    bool GetState();
     /**
      * @brief connect_to подключит оболочку к базе дынных, если вызвать метод без пораметров то подключение произойдет с прошлыми данными.
      * @param user логин пользовотеля
@@ -226,17 +226,6 @@ public:
      */
     void Query(const QString&);
     /**
-     * @brief StartDB запустит базу данных (начнет отчет)
-     * @param dayU новый день отчетности успеваемости (1-28)
-     * @param dayP новый день недели отчетности пропусков, (0-6)
-     */
-    void StartDB(const char dayU=-1,const char dayP=-1);
-    /**
-     * @brief StopBD остоновит базу данных
-     * @param toArhive следует ли переносить базу данных в архив.
-     */
-    void StopBD(const bool toArhive=false);
-    /**
      * @brief Query_no_update выполнить запрос не обновляя модель запроса
      * @return верент истену если всё прошло успешно
      */
@@ -296,7 +285,7 @@ signals:
     /**
      * @brief stateChanged сигнализирует о изменении статуса базы данных.
      */
-    void stateChanged(state_BD);
+    void stateChanged(bool);
     /**
      * @brief Message передает сообщение от базы данных
      */

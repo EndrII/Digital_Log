@@ -16,6 +16,7 @@ PredmeMenager::PredmeMenager(sqlDataBase *bd_,const QString &gr, QWidget *parent
     tableLocal=new QTableView();
     tableLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     tableLocal->setModel(modelR);
+
     remove=new QPushButton(ELanguage::getWord(BUTTON_PREDMET_REMOVE));
     connect(remove,SIGNAL(clicked(bool)),this,SLOT(del()));
     add=new QPushButton(ELanguage::getWord(BUTTON_CREATE));
@@ -31,6 +32,7 @@ PredmeMenager::PredmeMenager(sqlDataBase *bd_,const QString &gr, QWidget *parent
     list->addWidget(toGroup);
     list->addWidget(remove);
     box->addLayout(list);
+
     box->addWidget(tableLocal);
     //box->addWidget(tableGroub);
     this->setLayout(box);

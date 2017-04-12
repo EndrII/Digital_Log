@@ -22,6 +22,8 @@ GroupMenager::GroupMenager(sqlDataBase *bd_, QWidget *parent) : QDialog(parent)
     dell=new QPushButton(ELanguage::getWord(BUTTON_DELETE),this);    dell->setFocusPolicy(Qt::NoFocus);
     addU=new QPushButton(ELanguage::getWord(BUTTON_ADD_STUDENT),this);
     predmets=new QPushButton(ELanguage::getWord(PREDMET_EDITOR),this); predmets->setFocusPolicy(Qt::NoFocus);
+    receipt_date=new QDateEdit();
+    expiration_date=new QDateEdit();
     cb=new QComboBox(this);
     ComboWrite();
     connect(cb,SIGNAL(activated(int)),this,SLOT(ComboChsnged(int)));
@@ -39,6 +41,14 @@ GroupMenager::GroupMenager(sqlDataBase *bd_, QWidget *parent) : QDialog(parent)
     list->addWidget(addU);
     list->addWidget(predmets);
     box->addLayout(list);
+    list=new QHBoxLayout();
+    list->addWidget(new QLabel(ELanguage::getWord(RECEIPT_DATE)));
+    list->addWidget(receipt_date);
+    box->addLayout(list);
+    list=new QHBoxLayout();
+    list->addWidget(new QLabel(ELanguage::getWord(EXPIRATION_DATE)));
+    list->addWidget(expiration_date);
+    box->addLayout(list);
     box->addWidget(tableGroub);
     this->setLayout(box);
     createContextMenu();
@@ -46,16 +56,18 @@ GroupMenager::GroupMenager(sqlDataBase *bd_, QWidget *parent) : QDialog(parent)
 void GroupMenager::addu(){
     bd->addStudent(cb->currentText(),QInputDialog::getText(this,ELanguage::getWord(BUTTON_ADD_STUDENT),
                                           ELanguage::getWord(ADD_STUDENT_ABOUT)));
-    bd->Query("select ФИО from "+cb->currentText());
+    bd->Query(QString("select name as '%0' from students where _group=(select id from groups where name='%1')").arg(
+                  ELanguage::getWord(NAME)).arg(cb->currentText()));
 }
 void GroupMenager::Renam(bool){
     for(QModelIndex index :tableGroub->selectionModel()->selectedRows()){
-        bd->Query_no_update("update "+cb->currentText()+" "
-                            "set ФИО='"+QInputDialog::getText(this,ELanguage::getWord(BUTTON_RENAME),
-                                                              ELanguage::getWord(RENAME_SUDENTS_MSG))+
-                            "' where ФИО='"+tableGroub->model()->data(index).toString()+"'");
+        bd->Query_no_update(QString("update students set name='%0' where name='%1'").
+                            arg(QInputDialog::getText(this,ELanguage::getWord(BUTTON_RENAME),
+                                                      ELanguage::getWord(RENAME_SUDENTS_MSG))).
+                            arg(tableGroub->model()->data(index).toString()));
     }
-    bd->Query("select ФИО from "+cb->currentText());
+    bd->Query(QString("select name as '%0' from students where _group=(select id from groups where name='%1')").arg(
+                  ELanguage::getWord(NAME)).arg(cb->currentText()));
 }
 void GroupMenager::del(){
     bd->deleteGrpoup(cb->itemText(cb->currentIndex()));
@@ -84,12 +96,9 @@ void GroupMenager::delu(bool){
     if(!QMessageBox::question(this,ELanguage::getWord(WARNING),
                              ELanguage::getWord(DELETE_STUDENTS_MSG),
                               ELanguage::getWord(YES), ELanguage::getWord(NO))){
-        //white(false);
         for(QModelIndex index :tableGroub->selectionModel()->selectedRows()){
             bd->deleteStudent(cb->currentText(),tableGroub->model()->data(index).toString());
         }
-        bd->Query("select ФИО from "+cb->currentText());
-        //white(true);
     }
 }
 void GroupMenager::ComboWrite(){
@@ -103,7 +112,8 @@ void GroupMenager::contextMenuEvent(QContextMenuEvent *event){
     menu.exec(event->globalPos());
 }
 void GroupMenager::ComboChsnged(int i){
-    bd->Query("select ФИО from "+cb->itemText(i));
+    bd->Query(QString("select name as '%0' from students where _group=(select id from groups where name='%1')").arg(
+                  ELanguage::getWord(NAME)).arg(cb->itemText(i)));
 }
 GroupMenager::~GroupMenager(){
 }
