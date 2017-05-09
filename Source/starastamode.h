@@ -42,9 +42,9 @@ private:
     QCheckBox * showCritikal,*showWarning,*showNormal;
     QStringList listColumnHaider;
     sqlDataBase *bd;
-    QAction *sortUP,*sortDOWN,*enter;
+    QAction *sortUP,*sortDOWN;
     QSqlQuery *qyer;
-    QSqlQueryModel *model;
+    MySqlQueryColorModel *model;
     QComboBox *groups;
     QDateEdit *beginRange,*endRange;
     QPushButton *print_,*save;
@@ -61,7 +61,7 @@ public:
 private slots:
     void saveStateChanged(int);
     //void sortChanged(QModelIndex, QModelIndex);
-    void Enter();
+    void Enter(QModelIndex,QModelIndex,QVector<int>);
     void sortTableU();
     void sortTableD();
     void filterUpdate();

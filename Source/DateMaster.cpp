@@ -46,16 +46,6 @@ DateMaster::DateMaster(sqlDataBase *bd, const QString &tablename, const QDate &l
     temp->setLayout(boxL);
     //modeTab->addTab(temp,ELanguage::getWord(STATIC_MODE));
     tempBox->addWidget(temp);
-
-    /*temp=new QWidget();
-    QVBoxLayout *boxH=new QVBoxLayout();
-
-    numberFirstDate=new QSpinBox();
-    numberFirstDate->setMinimum(0);
-    boxH->addWidget(new QLabel(ELanguage::getWord(DAY_OF_BEGIN)));
-    boxH->addWidget(numberFirstDate);
-    temp->setLayout(boxH);*/
-  //  modeTab->addTab(temp,ELanguage::getWord(DATE_MODE));
     box->addLayout(tempBox);
     bar=new QProgressBar();
     bar->setValue(0);
@@ -103,9 +93,9 @@ void DateMaster::ok_(bool){
                 i++;
             }
             if(i!=dayNames->selectionModel()->selectedRows().size())
-                database->Query_no_update("INSERT INTO "+tableTimeName+
-                                         "(Даты) VALUES (STR_TO_DATE('"+
-                                          date.toString("dd.MM.yyyy")+"','%d.%m.%Y'))");
+                database->Query_no_update(QString("INSERT INTO dates(date_group,point) "
+                                                  "VALUE((select id from date_groups where name='%0'),'%1')").
+                                          arg(tableTimeName).arg(date.toString("yyyy-MM-dd")));
             bar->setValue(++progress);
         }
     }else{
@@ -123,16 +113,21 @@ void DateMaster::ok_(bool){
         date.setDate(date.year(),date.month(),1);
         while(date<=EndDate->date()){
             date=date.addMonths(1);
-            database->Query_no_update("INSERT INTO "+tableTimeName+
+            /*database->Query_no_update("INSERT INTO "+tableTimeName+
                                      "(Даты) VALUES (STR_TO_DATE('"+
                                       date.addDays(intervalFromMode1->value()-1).toString("dd.MM.yyyy")+"','%d.%m.%Y'))");
 
+*/
+            QString temp=QString("INSERT INTO dates(date_group,point) "
+                                 "VALUE((select id from date_groups where name='%0'),'%1')").
+                         arg(tableTimeName).arg(date.addDays(intervalFromMode1->value()-1).toString("yyyy-MM-dd"));
+            qDebug()<<database->Query_no_update(temp)<<": "<<temp;
             bar->setValue(++progress);
         }
     }
-    database->Query_no_update("update "+tableTimeName+" set  id=("
+    /*database->Query_no_update("update "+tableTimeName+" set  id=("
                               "SELECT @number_:= @number_ + 1 FROM"
-                              "(SELECT @number_:= 0) as tbl);");
+                              "(SELECT @number_:= 0) as tbl);");*/
     this->close();
 }
 void DateMaster::cancle_(bool){

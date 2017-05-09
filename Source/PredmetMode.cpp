@@ -49,8 +49,8 @@ PredmetMode::PredmetMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     //table->setFocusPolicy(Qt::NoFocus);
     norma=new QPushButton(ELanguage::getWord(NORMA_YAHR));
     qyer=bd->registration();
-    model=new MySqlQueryColorModelU();
-    model->setQuery(*qyer);
+    model=new MySqlQueryColorModel();
+    //model->setQuery(*qyer);
     table->setModel(model);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->setMinimumSize(800,480);
@@ -119,7 +119,7 @@ PredmetMode::PredmetMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     box->addLayout(list);
     box->addWidget(table);
     this->setLayout(box);
-    connect(bd,SIGNAL(ChangedBD()),this,SLOT(updateGroups()));
+    //connect(bd,SIGNAL(ChangedBD()),this,SLOT(updateGroups()));
     connect(print_,SIGNAL(clicked(bool)),this,SLOT(PrintClick()));
     connect(limit_LC,SIGNAL(valueChanged(int)),this,SLOT(changed_limit_LC(int)));
     connect(limit_PC,SIGNAL(valueChanged(int)),this,SLOT(changed_limit_PC(int)));
@@ -260,7 +260,7 @@ void PredmetMode::updateTable(const QString& name,const short index, bool DESC){
     q+=" ORDER BY "+listColumnHaider[index]+((DESC)?" DESC ":"");
 
     qDebug()<<qyer->exec(q)<<q;
-    model->setQuery(*qyer);
+    //model->setQuery(*qyer);
 }
 void PredmetMode::updateLimits(){
     float k;
@@ -321,13 +321,13 @@ void PredmetMode::updateTable(const QString& name,const QString&time){
     ((MySqlQueryColorModelU*)model)->setLimit(limit_PC->value(),PC_);
     ((MySqlQueryColorModelU*)model)->setLimit(limit_KRC->value(),KRC_);
     ((MySqlQueryColorModelU*)model)->setLimit(limit_RGRC->value(),RGRC_);
-    model->setQuery(*qyer);
+    //model->setQuery(*qyer);
 }
 void PredmetMode::Enter(){
-    bool ok;
+  /*  bool ok;
     short indexRow=table->currentIndex().row();
     short indexColumn=table->currentIndex().column();
-    QString tempName=model->data(model->index(indexRow,0)).toString();
+ //   QString tempName=model->data(model->index(indexRow,0)).toString();
     int tempData=QInputDialog::getInt(this,ELanguage::getWord(ENTER_VALUE),ELanguage::getWord(ENTER_FROM)+
                                       "("+model->headerData(indexColumn,Qt::Horizontal).toString()+") "+
                                       tempName,0,0,56,1,&ok);
@@ -342,14 +342,14 @@ void PredmetMode::Enter(){
         QString time=times->currentText().replace('-','_');
         qyer->exec("UPDATE "+prefix[table->currentIndex().column()]+name+" "
                    "SET "+time+"="+QString::number(tempData)+" WHERE ФИО='"+tempName+"'");
-        bd->sumCount(groups->currentText(),predmets->currentText(),indexColumn-1,model->data(model->index(indexRow,0)).toString());
+        //bd->sumCount(groups->currentText(),predmets->currentText(),indexColumn-1,model->data(model->index(indexRow,0)).toString());
         updateTable(name,time);
         if(++indexRow>=model->rowCount()){
             indexColumn++;
             indexRow=0;
         }
         table->selectionModel()->setCurrentIndex(model->index(indexRow,indexColumn),QItemSelectionModel::Select);
-    }
+    }*/
 }
 void PredmetMode::normaClick(){
     (new LimitWorksWidget(groups->currentText(),predmets->currentText(),bd))->exec();

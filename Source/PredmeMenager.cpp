@@ -32,47 +32,35 @@ PredmeMenager::PredmeMenager(sqlDataBase *bd_,const QString &gr, QWidget *parent
     list->addWidget(toGroup);
     list->addWidget(remove);
     box->addLayout(list);
-
     box->addWidget(tableLocal);
-    //box->addWidget(tableGroub);
     this->setLayout(box);
     createContextMenu();
-    querL->exec("select Наименование from  предметы");
-    modelL->setQuery(*querL);
-    querR->exec("select предмет from P_"+group);
-    modelR->setQuery(*querR);
+    update_(U_LEFT|U_RIGHT);
 }
 void PredmeMenager::Renam(bool){
     for(QModelIndex index :tableGlobal->selectionModel()->selectedRows()){
-        bd->Query_no_update("update предметы "
-                            "set Наименование='"+QInputDialog::getText(this,ELanguage::getWord(BUTTON_RENAME),
-                                                              ELanguage::getWord(RENAME_PREDMET_MSG))+
-                            "' where Наименование='"+tableGlobal->model()->data(index).toString()+"'");
+        bd->Query_no_update(QString("update subjects set name='%0' where name='%1' ").arg(QInputDialog::getText(this,ELanguage::getWord(BUTTON_RENAME),
+                                                                                  ELanguage::getWord(RENAME_PREDMET_MSG))).
+                            arg(tableGlobal->model()->data(index).toString()));
     }
-    querL->exec("select Наименование from  предметы");
-    modelL->setQuery(*querL);
-    querR->exec("select предмет from P_"+group);
-    modelR->setQuery(*querR);
+    update_(U_LEFT|U_RIGHT);
 }
 void PredmeMenager::del(){
     for(QModelIndex index :tableLocal->selectionModel()->selectedRows()){
         bd->removePredmetGroup(group,tableLocal->model()->data(index).toString());
     }
-    querR->exec("select предмет from P_"+group);
-    modelR->setQuery(*querR);
+    update_(U_RIGHT);
 }
 void PredmeMenager::add_(){
     bd->createPredmet(QInputDialog::getText(this,ELanguage::getWord(NEW_PREDMET_TITLE),
                                           ELanguage::getWord(NEW_PREDMET_ABOUT)));
-    querL->exec("select Наименование from  предметы");
-    modelL->setQuery(*querL);
+    update_(U_LEFT);
 }
 void PredmeMenager::toGr(){
     for(QModelIndex index :tableGlobal->selectionModel()->selectedRows()){
         bd->addPredmetGroup(group,tableGlobal->model()->data(index).toString());
     }
-    querR->exec("select предмет from P_"+group);
-    modelR->setQuery(*querR);
+    update_(U_RIGHT);
 }
 void PredmeMenager::createContextMenu(){
     deletePredmet=new QAction(ELanguage::getWord(BUTTON_DELETE));
@@ -90,9 +78,16 @@ void PredmeMenager::dell(bool){
         for(QModelIndex index :tableGlobal->selectionModel()->selectedRows()){
             bd->deletePredmet(tableGlobal->model()->data(index).toString());
         }
-        querL->exec("select Наименование from  предметы");
+        update_(U_LEFT|U_RIGHT);
+    }
+}
+void PredmeMenager::update_(char mode){
+    if(mode&U_LEFT){
+        querL->exec("select name from subjects order by name");
         modelL->setQuery(*querL);
-        querR->exec("select предмет from P_"+group);
+    }
+    if(mode&U_RIGHT){
+        querR->exec(QString("select name from subjects s INNER JOIN subjects_groups g ON g._group=(select id from groups where name='%0') and s.id=g.subject").arg(group));
         modelR->setQuery(*querR);
     }
 }

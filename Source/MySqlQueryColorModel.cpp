@@ -1,7 +1,7 @@
 #include "MySqlQueryColorModel.h"
 
 MySqlQueryColorModel::MySqlQueryColorModel():
-    QSqlQueryModel(){
+    QStandardItemModel(){
     limit=-1;
    // db=dB;
 }
@@ -43,7 +43,7 @@ void MySqlQueryColorModel::setLimit(const int row){
 }
 QVariant MySqlQueryColorModel::data(const QModelIndex &index, int role) const{
     if(Qt::BackgroundRole==role){
-        float temp=limit/(QSqlQueryModel::data(QSqlQueryModel::index(index.row(),columnCount()-1)).toFloat()+1);
+        float temp=limit/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
         if(temp<0){
             return QBrush(QColor(240,255,240));//good
         }else{
@@ -60,7 +60,7 @@ QVariant MySqlQueryColorModel::data(const QModelIndex &index, int role) const{
             }
         }
     }
-    return QSqlQueryModel::data(index,role);
+    return QStandardItemModel::data(index,role);
 }
 MySqlQueryColorModel::~MySqlQueryColorModel(){
 }
@@ -137,7 +137,7 @@ QVariant MySqlQueryColorModelU::data(const QModelIndex &index, int role) const{
                 break;
             }
         }else{
-            float temp=limit[last]/(QSqlQueryModel::data(QSqlQueryModel::index(index.row(),columnCount()-1)).toFloat()+1);
+            float temp=limit[last]/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
             if(temp<0){
                 return QBrush(QColor(240,255,240));//good
             }else{
@@ -153,7 +153,7 @@ QVariant MySqlQueryColorModelU::data(const QModelIndex &index, int role) const{
             }
         }
     }
-    return QSqlQueryModel::data(index,role);
+    return QStandardItemModel::data(index,role);
 }
 MySqlQueryColorModelU::~MySqlQueryColorModelU(){
 }

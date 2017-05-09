@@ -39,24 +39,24 @@ DateEditor::DateEditor(sqlDataBase *database, QWidget *ptr):
 }
 void DateEditor::DateMasterP(bool){
     if(modelP->rowCount()>0){
-        (new DateMaster(db,"времяПропуски",modelP->data(modelP->index(modelP->rowCount()-1,0)).toDate(),this))->exec();
+        (new DateMaster(db,"attendance",modelP->data(modelP->index(modelP->rowCount()-1,0)).toDate(),this))->exec();
     }else{
-        (new DateMaster(db,"времяПропуски",QDate(),this))->exec();
+        (new DateMaster(db,"attendance",QDate(),this))->exec();
     }
     updateTables();
 }
 void DateEditor::DateMasterU(bool){
     if(modelU->rowCount()>0){
-        (new DateMaster(db,"времяУроки",modelU->data(modelU->index(modelU->rowCount()-1,0)).toDate(),this))->exec();
+        (new DateMaster(db,"performance",modelU->data(modelU->index(modelU->rowCount()-1,0)).toDate(),this))->exec();
     }else{
-        (new DateMaster(db,"времяУроки",QDate(),this))->exec();
+        (new DateMaster(db,"performance",QDate(),this))->exec();
     }
     updateTables();
 }
 void DateEditor::updateTables(){
-    qyerP->exec("select Даты  from времяПропуски");
+    qyerP->exec("select point from dates where date_group=1");
     modelP->setQuery(*qyerP);
-    qyerU->exec("select Даты  from времяУроки");
+    qyerU->exec("select point from dates where date_group=2");
     modelU->setQuery(*qyerU);
 
 }
@@ -118,20 +118,22 @@ void DateEditor::AddDate_(bool){
 void DateEditor::deleteDate_(bool){
     if(this->focusWidget()==tableP){
         for(QModelIndex index :tableP->selectionModel()->selectedRows()){
-            if(tableP->model()->data(index).toDate()>QDate::currentDate())
-            qyerP->exec("DELETE FROM времяПропуски WHERE Даты='"+
-                        tableP->model()->data(index).toString()+"'");
+            if(tableP->model()->data(index).toDate()>QDate::currentDate()){
+                QString temp=QString("DELETE FROM dates WHERE point='%0' and date_group=1").
+                        arg(tableP->model()->data(index).toDate().toString("yyyy-MM-dd"));
+                qDebug()<<qyerP->exec(temp)<<": "+temp;
+            }
         }
-        qyerP->exec("select Даты  from времяПропуски");
+        qyerP->exec("select point from dates where date_group=1");
         modelP->setQuery(*qyerP);
     }
     if(this->focusWidget()==tableU){
         for(QModelIndex index :tableU->selectionModel()->selectedRows()){
             if(tableU->model()->data(index).toDate()>QDate::currentDate())
-            qyerU->exec("DELETE FROM времяУроки WHERE Даты='"+
-                        tableU->model()->data(index).toString()+"'");
+            qyerU->exec(QString("DELETE FROM dates WHERE point='%0' and date_group=2").
+                        arg(tableU->model()->data(index).toDate().toString("yyyy-MM-dd")));
         }
-        qyerU->exec("select Даты  from времяУроки");
+        qyerU->exec("select point from dates where date_group=2");
         modelU->setQuery(*qyerU);
     }
 }

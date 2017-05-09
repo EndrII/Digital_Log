@@ -16,6 +16,20 @@
 // * conectd - подключена и ведет отчет
 // */
 //enum state_BD{disconected,conectd};
+struct Write_Line_Params{
+    QString InToTable;//into write data table
+    QString rowInTo;// row of inToTable
+    QString columnInTo;// column of inToTable
+    QString valueInTo;// value of inToTable
+    QString DescRowTable;// table of description with id of row insert date
+    QString DescRowTableColumn;// table column of description with id of row insert date
+    QString DescColumnTable;// table of description with id of column insert date
+    QString DescColumnTableColumn;// table column of description with id of column insert date
+    QString dateType; //if DescColumnTable = dates then you need select dates type
+    QString valueRow;// Vertical header of model table
+    QString valueColumn;// Horizontal header of model table
+    QString value;// value of model table
+};
 /**
  * @brief The sqlDataBase class
  * класс упровления базами данных
@@ -52,25 +66,19 @@ public:
     explicit sqlDataBase();
     /**
      * @brief transformQuery transformation a date of the query to standartItemModel
+     * @param query query of table
      * @param columnData select column of the data
      * @param rowData select row of the data
      * @param valueData select value from the table
      * @return feedback
      */
-    bool transformQuery(const QString& columnData,const QString& rowData,const QString& valueData,QStandardItemModel*);
+    bool transformQuery(const QString &query, const QString& columnData, const QString& rowData, const QString& valueData, QStandardItemModel*);
     /**
      * @brief writeLine write a line into a selected table if this line created then update this
-     * @param tableName name of table
-     * @param column name of the column column
-     * @param row name of the row column
-     * @value value name of the value column
-     * @param columnData data of column
-     * @param rowData data of row
-     * @param valueData the inserted value
-     * @return return boolean
+     * @param description description of table
      * @example writeLine(Graf,x,y,val,1,1,1.333);
      */
-    bool writeLine(const QString& tableName,const QString& column,const QString& row,const QString& value,const QString& columnData,const QString& rowData,const QString& valueData);
+    bool writeLine(const Write_Line_Params& description);
     /**
      * @brief writeTableModel this function write a table into connectiondatabase;
      * @param tableName name of table with datas
@@ -79,13 +87,25 @@ public:
      * @param valueData name of dataitems
      * @return true if all done else false
      */
-    bool writeTableModel(const QString& tableName,const QString& columnData,const QString& rowData,const QString& valueData,QStandardItemModel*);
+    bool writeTableModel(Write_Line_Params description, QStandardItemModel*);
     /**
      * @brief registration регистрация дополнительного запроса для этой базы данных
      * ПРЕДУПРЕЖДЕНИЕ - зарегистрированные запросы не отслеживаются на ошибки!
      * @return вернет новый запрос.
      */
     QSqlQuery* registration();
+    /**
+     * @brief getReceiptDate return a group of Receipt Date
+     * @param group
+     * @return a date of receipt
+     */
+    QDate  getReceiptDate(const QString& group);
+    /**
+     * @brief getExpirationDate return a group of Expiration Date
+     * @param group
+     * @return a date of Expiration
+     */
+    QDate  getExpirationDate(const QString& group);
     /**
      * @brief GetState
      * @return вернет статус базы данных
@@ -148,40 +168,7 @@ public:
      * @param name имя студента
      */
     void deleteStudent(const QString &group, const QString name);
-    /**
-     * @brief sumCount пересчитает суммы для указанной группы по предмету.
-     * @param group группа для которой будет выполнен пересчёт
-     * @param predmet предмет для которого будет выполнятся пересчёт
-     * @param index индекс префикса для которого будет выполнен пересчёт
-     */
-    void sumCount(const QString & group, const QString& predmet,const int &index);
-    /**
-     * @brief sumCount пересчитает суммы для указанной группы по предмету.
-     * @param group группа для которой будет выполнен пересчёт
-     * @param predmet предмет для которого будет выполнятся пересчёт
-     * @param index индекс префикса для которого будет выполнен пересчёт
-     * @param name имя запеси для которой будет выполнятся обновление
-     */
-    void sumCount(const QString & group, const QString& predmet,const int &index,const QString & name);
-
-  /*
-     * @brief sumCount пересчитает суммы для указанной группы по предмету.
-     * @param group группа для которой будет выполнен пересчёт
-     * @param predmet предмет для которого будет выполнятся пересчёт
-     *
-    void sumCount(const QString & group, const QString& predmet);*/
-    /**
-     * @brief sumCount пересчитает суммы для указанной группы.
-     * @param group - имя группы дял которой буду перещетанны столбцы.
-     */
-    void sumCount(const QString & group);
-    /**
-     * @brief sumCount
-     * @param group
-     * @param name имя запеси
-     */
-    void sumCount(const QString & group,const QString &name);
-    /**
+     /**
      * @brief getModel
      * @return вернет стандартную модель предстовления стандартного запроса
      */
@@ -292,7 +279,7 @@ signals:
     void Message(int,QString);
     /**
      * @brief ChangedBD если в базе данных произошли изменения
-     */
+    */
     void ChangedBD();
 };
 #endif // SQLDATABASE_H

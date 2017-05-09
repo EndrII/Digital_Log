@@ -41,7 +41,7 @@ private:
 
     QAnimationGroup *menu;
     QSqlQuery *qyer;
-    QSqlQueryModel *model;
+    MySqlQueryColorModel *model;
     QStringList listColumnHaider;
     QAction *sortUP,*sortDOWN,*enter;
     QComboBox *groups;

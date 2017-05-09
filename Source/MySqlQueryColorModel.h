@@ -15,7 +15,7 @@ struct StackItem{
     QString predmet;
     QString Group;
 };
-class MySqlQueryColorModel:public QSqlQueryModel
+class MySqlQueryColorModel:public QStandardItemModel
 {
     Q_OBJECT
 private:

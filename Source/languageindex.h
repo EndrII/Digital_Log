@@ -139,4 +139,5 @@
 #define EDATA_BASES 136
 #define RECEIPT_DATE 137
 #define EXPIRATION_DATE 138
+#define SET 139
 #endif // LANGUAGEINDEX_H

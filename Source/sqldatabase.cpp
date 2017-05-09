@@ -26,6 +26,18 @@ void sqlDataBase::connect_to(const QString &user, const QString &pass, const QSt
 QSqlQuery* sqlDataBase::registration(){
     return new QSqlQuery(*this);
 }
+QDate sqlDataBase::getReceiptDate(const QString &group){
+    if(qer->exec(QString("select receipt_date from groups where name='%0' ").arg(group))&&qer->next()){
+        return qer->value(0).toDate();
+    }
+    return QDate(0,0,0);
+}
+QDate sqlDataBase::getExpirationDate(const QString &group){
+    if(qer->exec(QString("select expiration_date from groups where name='%0' ").arg(group))&&qer->next()&&!qer->isNull(0)){
+        return qer->value(0).toDate();
+    }
+    return QDate(0,0,0);
+}
 bool sqlDataBase::GetState(){
     return state;
 }
@@ -159,45 +171,42 @@ bool sqlDataBase::createDB(const QString &BaseName){
 void sqlDataBase::createGroup(QString GroupName){
     if(GroupName.isEmpty())
         return;
-    if(qer->exec(QString("INSERT INTO groups(name,receipt_date,year) VALUE('%0',CURDATE(),0)").arg(GroupName))){
+    if(qer->exec(QString("INSERT INTO groups(name,receipt_date,year,expiration_date) VALUE('%0',CURDATE(),0,DATE_ADD(CURDATE(), INTERVAL 4 YEAR))").arg(GroupName))){
         emit Message(1,ELanguage::getWord(GROUP_CREATED)+" "+GroupName);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_CREATING_GROUP));
     }
 }
 void sqlDataBase::createPredmet(QString PredmetName){
     if(PredmetName.isEmpty())return;
-    PredmetName.remove(QRegExp("[`/'.]"));
-    removeFirstAndLastChars(' ', PredmetName);
-    PredmetName.replace(' ','_');
-    bool ok;
-    PredmetName.toInt(&ok);
-    if(ok)
-        PredmetName.insert(0,'_');
-    if(qer->exec("call createPredmet('"+PredmetName+"');")){
+    if(qer->exec(QString("INSERT INTO subjects(name) VALUE('%0')").arg(PredmetName))){
         emit Message(1,ELanguage::getWord(PREDMET_CREATED)+" "+PredmetName);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_CREATING_PREDMET));
     }
 }
 int sqlDataBase::getGroupLimit(const QString &group){
-    qer->exec("select lim from группы where Имя='"+group+"'");
+    qer->exec("select lim from limits where _group='"+group+"' and isattendance=1");
     qer->next();
     return qer->value(0).toInt();
 }
 void sqlDataBase::setGroupLimit(const QString &group,const int &limit){
-    qer->exec("update группы set lim="+QString::number(limit)+"  where Имя='"+group+"'");
+    if(!qer->exec(QString("INSERT INTO limitsGroup(_value,_group) VALUE(%0,(select id from groups where name='%1'))").arg(QString::number(limit),group))){
+        qer->exec(QString("UPDATE  limitsGroup SET _value=%0 where _group='%1'").arg(QString::number(limit),group));
+    }
 }
 int sqlDataBase::getGroupLimit(const QString &group,const QString &prefix,const QString &predmet){
-    qer->exec("select lim from limits where группа='"+group+"' and предмет='"+predmet+"' and prefix_='"+prefix+"'");
+    qer->exec("select _value from limits where _group='"+group+"' and subject='"+predmet+"' and work_group='"+prefix+"'");
     qer->next();
     return qer->value(0).toInt();
 }
 void sqlDataBase::setGroupLimit(const QString &group,const QString &prefix,const QString &predmet, const int &limit){
-    QString q="update limits set lim="+QString::number(limit)+"  where группа='"+group+"' and предмет='"+predmet+"' and prefix_='"+prefix+"'";
-    qer->exec(q);
+    if(!qer->exec(QString("INSERT INTO limits(_value,_group,subject,work_group) VALUE(%0,"
+                      "select id from groups where name='%1',select if from subjects where name='%2',"
+                      "select id from work_groups where name='%3')").arg(QString::number(limit),group,predmet,prefix))){
+        qer->exec(QString("UPDATE limits SET _value=%0 where _group=(select id from groups where name='%1' and "
+                          "'select if from subjects where name='%2' and 'select id from work_groups where name='%3'')").arg(QString::number(limit),group,predmet,prefix));
+    }
 }
 void sqlDataBase::removeFirstAndLastChars(const QChar item, QString &data){
     while (data[0]==item) {
@@ -209,56 +218,20 @@ void sqlDataBase::removeFirstAndLastChars(const QChar item, QString &data){
 }
 void sqlDataBase::addStudent(const QString &group, const QString name){
     if(!name.isEmpty()&&qer->exec(
-                QString("insert into students(name,_group) value('%0',(select id from groups where name=%1))").arg(name).arg(group))){
+                QString("insert into students(name,_group) value('%0',(select id from groups where name='%1'))").arg(name).arg(group))){
 
             emit Message(1,ELanguage::getWord(STUDENT_ADD)+" "+name);
-            emit ChangedBD();
+            //emit ChangedBD();
         }else{
             error_msg();
         }
 }
-void sqlDataBase::sumCount(const QString &group){
-    qer->exec("select *  from "+ group);
-    QSqlQuery query(*this);
-    while(qer->next()){
-        short summ=0;
-        for(short i=2;i<qer->record().count();i++){
-            summ+=qer->value(i).toInt();
-        }
-        QString debug="update "+group+" set sum="+QString::number(summ)+
-                " where ФИО='"+qer->value(1).toString()+"'";
-        query.exec(debug);
-    }
-}
-void sqlDataBase::sumCount(const QString &group, const QString &name){
-    qer->exec("select *  from "+ group+" where ФИО='"+name+"'");
-    QSqlQuery query(*this);
-    while(qer->next()){
-        short summ=0;
-        for(short i=2;i<qer->record().count();i++){
-            summ+=qer->value(i).toInt();
-        }
-        QString debug="update "+group+" set sum="+QString::number(summ)+
-                " where ФИО='"+qer->value(1).toString()+"'";
-        query.exec(debug);
-    }
-}
-void sqlDataBase::sumCount(const QString &group, const QString &predmet,const int &index){
-    QStringList prefix;
-    prefix<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
-    sumCount(prefix[index]+predmet+group);
-}
-void sqlDataBase::sumCount(const QString &group, const QString &predmet,const int &index,const QString & name){
-    QStringList prefix;
-    prefix<<"PC_"<<"LC_"<<"KRC_"<<"RGRC_"<<"LD_"<<"KRD_"<<"RGRD_";
-    sumCount(prefix[index]+predmet+group,name);
-}
 void sqlDataBase::deleteStudent(const QString &group, const QString name){
     if(qer->exec(QString("DELETE FROM students where "
-                         "_gropu=(select id from group where name='%0') and name='%1'")
+                         "_group=(select id from groups where name='%0') and name='%1'")
                  .arg(group).arg(name))){
         emit Message(1,ELanguage::getWord(STUDENT_DELETED)+" "+name);
-        emit ChangedBD();
+        //emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_DELETE));
     }
@@ -266,32 +239,31 @@ void sqlDataBase::deleteStudent(const QString &group, const QString name){
 void sqlDataBase::deleteGrpoup(const QString &name){
     if(qer->exec(QString("DELETE FROM groups where name='%0'").arg(name))){
         emit Message(1,ELanguage::getWord(GROUP_DELETED)+" "+name);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 
 void sqlDataBase::deletePredmet(const QString &name){
-    if(qer->exec("call deleteGlobalPredmet('"+name+"');")){
+    if(qer->exec(QString("DELETE FROM subjects where name='%0'").arg(name))){
         emit Message(1,ELanguage::getWord(PREDMET_DELETED)+" "+name);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_DELETE));
     }
 }
 void sqlDataBase::addPredmetGroup(const QString &gr, const QString &pred){
-    if(qer->exec("call addPredmet('"+pred+"','"+gr+"',1);")){
+    if(qer->exec(QString("INSERT INTO subjects_groups(_group,subject) VALUE("
+                         "(select id from groups where name='%0'),"
+                         "(select id from subjects where name ='%1'))").arg(gr).arg(pred))){
         emit Message(1,ELanguage::getWord(PREDMET_ADDED)+" "+pred+"->"+gr);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_ADD_PREDMET));
     }
 }
 void sqlDataBase::removePredmetGroup(const QString &gr, const QString &pred){
-    if(qer->exec("call deletePredmet('"+pred+"','"+gr+"',1);")){
+    if(qer->exec(QString("DELETE FROM subjects_groups where _group=(select id from groups where name='%0')"
+                         " and subject=(select id from subjects where name='%1')").arg(gr).arg(pred))){
         emit Message(1,ELanguage::getWord(PREDMET_DELETED_GR)+" "+pred+"->"+gr);
-        emit ChangedBD();
     }else{
         error_msg(ELanguage::getWord(ERROR_DELETE));
     }
@@ -299,52 +271,59 @@ void sqlDataBase::removePredmetGroup(const QString &gr, const QString &pred){
 QSqlQuery * sqlDataBase::getQuery(){
     return qer;
 }
-bool sqlDataBase::writeTableModel(const QString &tableName ,const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
+bool sqlDataBase::writeTableModel(Write_Line_Params description, QStandardItemModel * model){
     for(int r=0;r<model->rowCount();r++){
         for(int c=0;model->columnCount();c++){
-            if(!writeLine(tableName,columnData,rowData,valueData,
-                      model->headerData(c,Qt::Horizontal).toString(),
-                      model->headerData(r,Qt::Vertical).toString(),
-                      model->data(model->index(c,r)).toString()))
+             description.valueColumn=model->headerData(c,Qt::Horizontal).toString();
+             description.valueRow=model->headerData(r,Qt::Vertical).toString();
+             description.value=model->data(model->index(c,r)).toString();
+            if(!writeLine(description))
                 return false;
         }
     }
     return true;
-} // this function not tested !!!!
-bool sqlDataBase:: writeLine(const QString& tableName, const QString &column, const QString &row, const QString& value, const QString& columnData, const QString& rowData, const QString& valueData){
-    bool okColumn,okRow,okVal;
-    columnData.toInt(&okColumn);
-    rowData.toInt(&okRow);
-    valueData.toInt(&okVal);
-    if(qer->exec(QString("INSERT INTO %0(%1,%2,%3) VALUE(%4,%5,%6)").arg(
-                      tableName,column,row,value,(okColumn)?columnData:"'"+columnData+"'",
-                      (okRow)?rowData:"'"+rowData+"'",(okVal)?valueData:"'"+valueData+"'"))){
+}
+bool sqlDataBase:: writeLine(const Write_Line_Params& description){
+    QString q=QString("INSERT INTO %0(%1,%2,%3) VALUE((select id from %4"+((description.DescRowTable=="dates")?QString(" and date_group=%7 )"):QString(")"))+","
+                      "(select id from %5"+((description.DescColumnTable=="dates")?QString(" and date_group=%7 )"):QString(")"))+",%6)").arg(
+                description.InToTable,description.columnInTo,description.rowInTo,description.valueInTo,
+                description.DescRowTable+" where "+description.DescRowTableColumn+ "='"+description.valueRow+"'",
+                description.DescColumnTable+" where "+description.DescColumnTableColumn+ "='"+description.valueColumn+"'",
+                description.value,description.dateType);
+                //qDebug()<<q;
+
+    if(qer->exec(q)){
         return true;
     }else{
-        return qer->exec(QString("UPDATE %0 SET %3=%6 WHERE %1=%4 AND %2=%5").arg(
-                             tableName,column,row,value,(okColumn)?columnData:"'"+columnData+"'",
-                             (okRow)?rowData:"'"+rowData+"'",(okVal)?valueData:"'"+valueData+"'"));
+        QString q=QString("UPDATE %0 SET %3=%6 where %1=(select id from %4"+((description.DescRowTable=="dates")?QString(" and date_group=%7 )"):QString(")"))+" and "
+                          " %2=(select id from %5"+((description.DescColumnTable=="dates")?QString(" and date_group=%7 )"):QString(")"))+"").arg(
+                    description.InToTable,description.columnInTo,description.rowInTo,description.valueInTo,
+                    description.DescRowTable+" where "+description.DescRowTableColumn+ "='"+description.valueRow+"'",
+                    description.DescColumnTable+" where "+description.DescColumnTableColumn+ "='"+description.valueColumn+"'",
+                    description.value,description.dateType);
+        //qDebug()<<q;
+        return qer->exec(q);
     }
     return false;
-}// this function not tested !!!!
+}
 
-bool sqlDataBase::transformQuery(const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
-    if(qer->record().indexOf(columnData)>=0&&qer->record().indexOf(rowData)>=0&&qer->record().indexOf(valueData)){
+bool sqlDataBase::transformQuery(const QString& query,const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
+    if(qer->exec(query)){
         model->clear();
         qer->seek(0);
         while(qer->next()){
             int searchRow=0,searchColumn=0;
-            while(searchColumn<model->columnCount()&&model->headerData(searchColumn++,Qt::Horizontal)!=qer->value(columnData));
+            while(searchColumn<model->columnCount()&&model->headerData(searchColumn,Qt::Horizontal)!=qer->value(columnData))++searchColumn;
             if(searchColumn==model->columnCount()){
                 model->appendColumn(QList<QStandardItem*>());
-                model->setHeaderData(model->columnCount(),Qt::Horizontal,qer->value(columnData));
+                qDebug()<<"set name empty colum("<<qer->value(columnData)<<")="<<model->setHeaderData(model->columnCount()-1,Qt::Horizontal,qer->value(columnData));
             }
-            while(searchRow<model->rowCount()&&model->headerData(searchRow++,Qt::Vertical)!=qer->value(rowData));
+            while(searchRow<model->rowCount()&&model->headerData(searchRow,Qt::Vertical)!=qer->value(rowData))++searchRow;
             if(searchRow==model->rowCount()){
                 model->appendRow(QList<QStandardItem*>());
-                model->setHeaderData(model->rowCount(),Qt::Vertical,qer->value(rowData));
+                qDebug()<<"set name empty row("<<qer->value(rowData)<<")="<<model->setHeaderData(model->rowCount()-1,Qt::Vertical,qer->value(rowData));
             }
-            model->setData(model->index(searchRow,searchColumn),qer->value(valueData),Qt::EditRole);
+            qDebug()<<"r="<<searchRow<<" c="<<searchColumn<<" value="<<qer->value(valueData)<<" result="<<model->setData(model->index(searchRow,searchColumn),qer->value(valueData),Qt::EditRole);
         }
         return true;
     }

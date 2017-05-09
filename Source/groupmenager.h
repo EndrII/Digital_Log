@@ -30,6 +30,8 @@ private:
 private slots:
     void contextMenuEvent(QContextMenuEvent *event);
     void ComboChsnged(int);
+    void receipt_date_Changed();
+    void expiration_date_Changed();
     void Renam(bool);
     void del();
     void delu(bool);

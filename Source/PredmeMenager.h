@@ -13,7 +13,9 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QHeaderView>
-
+#define U_LEFT  0x1
+#define U_RIGHT 0x2
+//enum class UpdaeMod{LEFT,RIGHT};
 class PredmeMenager:public QDialog
 {
     Q_OBJECT
@@ -26,6 +28,7 @@ private:
     QTableView *tableGlobal,*tableLocal;
     QPushButton *add,*toGroup, *remove;
     void createContextMenu();
+    void update_(char update_mode);
 private slots:
     void contextMenuEvent(QContextMenuEvent *event);
     void Renam(bool);
