@@ -70,7 +70,7 @@ void PrinterDialog::ok_(int result){
             Printer::printPDF(Printer::getHTML(view,styleTextGenerate(false)),printLine->selectedFiles()[0]);
         else
         if(printLine->selectedNameFilter()=="HyperText (*.html)")
-            Printer::printPDF(Printer::getHTML(view,styleTextGenerate(false)),printLine->selectedFiles()[0]);
+            Printer::print(Printer::getHTML(view,styleTextGenerate(false)),printLine->selectedFiles()[0]);
         else
         if(printLine->selectedNameFilter()=="Microsoft Word (*.docx)")
             Printer::print(Printer::getHTML(view,styleTextGenerate(false)),printLine->selectedFiles()[0],"docx");

@@ -12,7 +12,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include "TableModel.h"
 class DataBasesMenager:public QDialog
 {
     Q_OBJECT

@@ -1,0 +1,36 @@
+Установка mySql cервера
+
+#Windows:
+качаем сервер 
+mysql-5.7.16-win32.zip - для 32 битной версии ОС  
+mysql-5.7.16-winx64.zip - для 64 битной версии ОС
+
+Далее в папку с сервером копируем файл my.ini
+и меняем в нем  следующие строки 
+datadir - папка для хранения баз данных (должна быть пустая)
+basedir - пвпка с сервером
+пример 
+datadir="D:\\mysql-5.7.16-winx64\\data"
+basedir="D:\\mysql-5.7.16-winx64"
+
+откройте папку с bin вашего сервера в консоли от имени администратора и выполните установку сервера
+#mysqld --initialize-insecure --user=root или  #mysqld --initialize --user=root для создания случайного пароля 
+#mysqld --install
+#net start mysql
+
+удаление сервера 
+#net stop mysql
+#mysql --remove
+
+Далее нужно создать и настроить пользователя 
+подключаемся к базе данных от имени Администратора 
+#mysql -u root 
+создаем пользовотеля 
+#CREATE USER 'user_name'@'access_host' IDENTIFIED BY 'user_password';
+назначим права пользовотелю 
+#GRANT ALL PRIVILEGES ON * . * TO 'user_name'@'access_host';
+В место access_host нужно указать хост доступа для пользователя если нужно что бы доступ можно было получить с любого компьютера укажите % 
+
+включение таймера сервера (нужно для запуска внутрених тригиров)
+#SET GLOBAL event_scheduler=ON;
+

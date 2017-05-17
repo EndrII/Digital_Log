@@ -47,9 +47,7 @@ SOURCES += main.cpp\
     DateMaster.cpp \
     PrinterDialog.cpp \
     MySqlQueryColorModel.cpp \
-    LimitWorksWidget.cpp \
-    SpaceEngineComponents/System/css.cpp \
-    TableModel.cpp
+    SpaceEngineComponents/System/css.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -77,12 +75,7 @@ HEADERS  += mainwindow.h \
     DateMaster.h \
     PrinterDialog.h \
     MySqlQueryColorModel.h \
-    LimitWorksWidget.h \
-    SpaceEngineComponents/System/css.h \
-    TableModel.h
-
-FORMS += \
-    form.ui
+    SpaceEngineComponents/System/css.h
 
 RESOURCES += \
     res.qrc \

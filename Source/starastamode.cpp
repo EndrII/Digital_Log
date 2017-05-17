@@ -26,13 +26,12 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     table=new QTableView(this);
     qyer=bd->registration();
     model=new MySqlQueryColorModel();
-
+    model->setSummColumn(true);
     table->setModel(model);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     showCritikal=new QCheckBox(ELanguage::getWord(SHOW_CRITICAL));showCritikal->setCheckState(Qt::Checked);
     showWarning=new QCheckBox(ELanguage::getWord(SHOW_WARNING));showWarning->setCheckState(Qt::Checked);
     showNormal=new QCheckBox(ELanguage::getWord(SHOW_NORMAL));showNormal->setCheckState(Qt::Checked);
-    //sort=new QComboBox();
     this->setMinimumSize(800,480);
     createContextMenu();
     QVBoxLayout *box=new QVBoxLayout();
@@ -63,9 +62,6 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     box->addLayout(list);
 
     box->addWidget(table);
-    bar=new QProgressBar();
-    bar->setMinimum(0);
-    bar->setVisible(false);
     this->setLayout(box);
     connect(bd,SIGNAL(ChangedBD()),this,SLOT(updateGroups()));
     connect(print_,SIGNAL(clicked(bool)),this,SLOT(PrintClick()));
@@ -73,27 +69,27 @@ StarastaMode::StarastaMode(sqlDataBase *bd_, QWidget *parent) : QWidget(parent)
     connect(beginRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(endRange,SIGNAL(dateChanged(QDate)),SLOT(updateTable()));
     connect(groups,SIGNAL(currentIndexChanged(int)),this,SLOT(GroupListChanged(int)));
-    connect(showNormal,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
-    connect(showWarning,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
-    connect(showCritikal,SIGNAL(stateChanged(int)),this,SLOT(updateTable()));
+    connect(showNormal,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
+    connect(showWarning,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
+    connect(showCritikal,SIGNAL(stateChanged(int)),this,SLOT(filterUpdate()));
 }
-void StarastaMode::updateTable(const short &index,bool DESC){
+void StarastaMode::updateTable(){
+
     disconnect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this
             ,SLOT(Enter(QModelIndex,QModelIndex,QVector<int>)));
-    QString q=QString("select s.name,point,_value from (dates  d , students s) LEFT JOIN attendance a ON (d.id=a._date and a.student=s.id) where"
-              " d.point>'%0' and d.point<'%1' and d.date_group=1 and s._group=(select id from groups where name='%2')").
+    QString q=QString("select s.name,point,_value from (dates  d , students s) LEFT JOIN attendance a ON (d.id=a._date and a.student=s.id) where "
+              "d.point>'%0' and d.point<'%1' and d.date_group=1 and s._group=(select id from groups where name='%2') ").
             arg(beginRange->date().toString("yyyy-MM-dd")).
             arg(endRange->date().toString("yyyy-MM-dd")).
             arg(groups->currentText());
     qDebug()<<q;
     bd->transformQuery(q,"point","name","_value",model);
+    model->recalc();
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this
             ,SLOT(Enter(QModelIndex,QModelIndex,QVector<int>)));
 }
 void StarastaMode::updateGroups(){
     ComboWrite();
-}
-void StarastaMode::keyPressEvent(QKeyEvent *event){
 }
 void StarastaMode::PrintClick(){
     ( new PrinterDialog(table,this))->exec();
@@ -122,7 +118,7 @@ void StarastaMode::createContextMenu(){
     connect(sortDOWN,SIGNAL(triggered(bool)),this,SLOT(sortTableD()));
 
 }
-void StarastaMode::Enter(QModelIndex mod, QModelIndex, QVector<int> role){
+void StarastaMode::Enter(QModelIndex mod, QModelIndex, QVector<int> ){
     Write_Line_Params temp;
     temp.InToTable="attendance";
     temp.columnInTo="student";
@@ -139,18 +135,40 @@ void StarastaMode::Enter(QModelIndex mod, QModelIndex, QVector<int> role){
     qDebug()<<"WriteLine="<<bd->writeLine(temp);
 }
 void StarastaMode::filterUpdate(){
-
-}
-void StarastaMode::saveStateChanged(int i){
-    save->setEnabled(i);
-    save->setText(ELanguage::getWord(BUTTON_SAVE)+"("+QString::number(i)+")");
-    bar->setVisible(i);
+    for(int i=0;i<model->rowCount();i++){
+        switch (model->checkLimit(model->index(i,model->columnCount()-1))) {
+        case filter::normal:
+            if(showNormal->isChecked())
+                table->showRow(i);
+            else
+                table->hideRow(i);
+            break;
+        case filter::warning:
+            if(showWarning->isChecked())
+                table->showRow(i);
+            else
+                table->hideRow(i);
+            break;
+        case filter::critical:
+            if(showCritikal->isChecked())
+                table->showRow(i);
+            else
+                table->hideRow(i);
+            break;
+        default:
+            if(showNormal->isChecked())
+                table->showRow(i);
+            else
+                table->hideRow(i);
+            break;
+        }
+    }
 }
 void StarastaMode::sortTableU(){
-    updateTable(table->selectionModel()->currentIndex().column());
+    table->sortByColumn(table->selectionModel()->currentIndex().column(),Qt::AscendingOrder);
 }
 void StarastaMode::sortTableD(){
-    updateTable(table->selectionModel()->currentIndex().column(),true);
+    table->sortByColumn(table->selectionModel()->currentIndex().column(),Qt::DescendingOrder);
 }
 void StarastaMode::contextMenuEvent(QContextMenuEvent *event){
         QMenu menu(this);

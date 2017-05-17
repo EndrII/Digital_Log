@@ -6,7 +6,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
-#include <QStandardItemModel>
+#include "MySqlQueryColorModel.h"
 #define PORT 2277
 // /**
  //* @brief The state_BD enum
@@ -29,6 +29,13 @@ struct Write_Line_Params{
     QString valueRow;// Vertical header of model table
     QString valueColumn;// Horizontal header of model table
     QString value;// value of model table
+};
+struct Write_Line_ParamsU{
+    QString student;
+    QString subject;
+    QString value;
+    QString work_group;
+    QString date;
 };
 /**
  * @brief The sqlDataBase class
@@ -79,6 +86,12 @@ public:
      * @example writeLine(Graf,x,y,val,1,1,1.333);
      */
     bool writeLine(const Write_Line_Params& description);
+    /**
+     * @brief writeLine write a line into a selected table if this line created then update this
+     * @param description description of table
+     * @example writeLine(Graf,x,y,val,1,1,1.333);
+     */
+    bool writeLine(const Write_Line_ParamsU& description);
     /**
      * @brief writeTableModel this function write a table into connectiondatabase;
      * @param tableName name of table with datas

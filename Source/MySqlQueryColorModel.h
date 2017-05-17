@@ -2,7 +2,7 @@
 #define MYSQLQUERYCOLORMODEL_H
 #include <QMap>
 #include <list>
-#include "sqldatabase.h"
+#include <QStandardItemModel>
 #include <QDebug>
 #include <QBrush>
 enum pref{LC_,PC_,KRC_,RGRC_};
@@ -15,22 +15,32 @@ struct StackItem{
     QString predmet;
     QString Group;
 };
+enum class filter{normal=0x01,warning=0x02,critical=0x04};
 class MySqlQueryColorModel:public QStandardItemModel
 {
     Q_OBJECT
 private:
     int limit;
-   // sqlDataBase *db;
-   // QList<StackItem> stack;
+    char filter_;
+    bool isSumm,loaded;
     void stackWrite();
+private slots:
+    void calc(int i);
+    void calc(QStandardItem *item);
+protected:
+    bool check(const filter& filt)const;
 public:
     MySqlQueryColorModel();
+    void recalc();
+    void setLoad(bool);
+    virtual filter checkLimit(const QModelIndex &index)const;
+    void setSummColumn(bool);
+    bool isSummColumn()const;
     virtual void setLimit(int lim=-1);
-    virtual void enter(const QModelIndex& index, int value, const StackItem &item);
+    virtual void setFilter(const char filter);
     QVariant data(const QModelIndex &index,int role)const Q_DECL_OVERRIDE;
     ~MySqlQueryColorModel();
 public slots:
-    void save();
 signals:
     void startSave(int);
     void SavesChanged(int);
@@ -45,9 +55,9 @@ private:
     int limit[4],last;
 public:
     MySqlQueryColorModelU();
+    virtual filter checkLimit(const QModelIndex &index)const;
     void clear();
     void setLimit(int lim=-1,pref prefix=LC_,bool all=false);
-    QVariant data(const QModelIndex &index,int role)const Q_DECL_OVERRIDE;
     ~MySqlQueryColorModelU();
 };
 

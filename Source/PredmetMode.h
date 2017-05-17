@@ -30,8 +30,15 @@
 #include "MounthDialog.h"
 #include "PrinterDialog.h"
 #include <QDateEdit>
-#include "LimitWorksWidget.h"
+//#include "LimitWorksWidget.h"
 #include "MySqlQueryColorModel.h"
+#define _LC_     "Выполнено Лабораторных Работ"
+#define _PC_     "Выполнено Практических Работ"
+#define _KRC_    "Выполнено Контрольных Работ"
+#define _RGRC_   "Выполнено Расчетно-графических Работ"
+#define _LD_     "Сдано Лабораторных Работ"
+#define _KRD_    "Сдано Контрольных Работ"
+#define _RGRD_   "Сдано Расчетно-графически Работ"
 class PredmetMode : public QWidget
 {
     Q_OBJECT
@@ -41,7 +48,7 @@ private:
 
     QAnimationGroup *menu;
     QSqlQuery *qyer;
-    MySqlQueryColorModel *model;
+    MySqlQueryColorModelU *model;
     QStringList listColumnHaider;
     QAction *sortUP,*sortDOWN,*enter;
     QComboBox *groups;
@@ -50,32 +57,21 @@ private:
     QDateEdit *beginRange,*endRange;
     QComboBox *predmets;
     QComboBox *times;
-    QPushButton *print_,*norma;
-    /*
-     * ('LC_','успеваемость выполненно лаб'),
-('PC_','успеваемость выполненно практических работ'),
-('KRC_','успеваемость выполненно контрольных работ'),
-('RGRC_','успеваемасть выполненно РГР'),
-('LD_','успеваемость зашищенно лаб'),
-('KRD_','успеваемость зашищенно практических работ'),
-('RGRD_','успеваемость зашищенно РГР');
-*/
+    QPushButton *print_;//*norma;
     QSpinBox *limit_LC,*limit_PC,*limit_KRC,*limit_RGRC;
     QTableView *table;
     void createContextMenu();
     void updateLimits();
-    void updateTable(const QString &name, const QString &time);
-    void updateTable(const QString &name, const short index=0, bool DESC=false);
+    void updateTable(bool isAll);
 public:
     explicit PredmetMode(sqlDataBase*bd, QWidget *parent = 0);
     ~PredmetMode();
 private slots:
-    void Enter();
-    void normaClick();
+    void Enter(QModelIndex, QModelIndex, QVector<int>);
+//    void normaClick();
     void sortTableU();
     void sortTableD();
     void filterUpdate();
-    void keyPressEvent(QKeyEvent* event);
     void ComboWrite(int);
     void updateGroups();
     void updateTable();

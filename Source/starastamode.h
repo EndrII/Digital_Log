@@ -47,36 +47,25 @@ private:
     MySqlQueryColorModel *model;
     QComboBox *groups;
     QDateEdit *beginRange,*endRange;
-    QPushButton *print_,*save;
-    QProgressBar *bar;
+    QPushButton *print_;
     QSpinBox *limit;
-    //QPushButton *change;
-    //QPushButton *remove;
     QTableView *table;
     void createContextMenu();
-    //void countSum();
 public:
     explicit StarastaMode(sqlDataBase*bd, QWidget *parent = 0);
     ~StarastaMode();
 private slots:
-    void saveStateChanged(int);
-    //void sortChanged(QModelIndex, QModelIndex);
     void Enter(QModelIndex,QModelIndex,QVector<int>);
     void sortTableU();
     void sortTableD();
     void filterUpdate();
-    void updateTable(const short &index=0,bool DESC=false);
-    void keyPressEvent(QKeyEvent* event);
+    void updateTable();
     void updateGroups();
     void PrintClick();
     void limitChange(int);
-   // void removeClick();
     void GroupListChanged(int);
 protected slots:
     void contextMenuEvent(QContextMenuEvent *event);
-signals:
-public slots:
-    //void BDOpened(QString);
 };
 
 #endif // STARASTAMODE_H

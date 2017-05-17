@@ -3,61 +3,85 @@
 MySqlQueryColorModel::MySqlQueryColorModel():
     QStandardItemModel(){
     limit=-1;
-   // db=dB;
+    isSumm=false;
+    loaded=false;
 }
-void MySqlQueryColorModel::enter(const QModelIndex &index, int value, const StackItem &item){
-   /* stack.push_back(item);
-    if(columnCount()<2||index.column()==0)
-        return;
-    if(this->query().lastQuery().indexOf("sum as")!=-1){
-       bool test= QSqlQueryModel::setData(this->index(index.row(),columnCount()-1),QSqlQueryModel::data(this->index(index.row(),columnCount()-1)).toInt()+value-QSqlQueryModel::data(index).toInt(),Qt::EditRole);
+bool MySqlQueryColorModel::check(const filter &filt) const{
+    return filter_&static_cast<char>(filt);
+}
+bool MySqlQueryColorModel::isSummColumn()const
+{
+    return isSumm;
+}
+void MySqlQueryColorModel::calc(int i){
+    int summ=0;
+    for(int j=0;j<this->columnCount()-1;j++){
+        summ+=this->data(index(i,j),Qt::EditRole).toInt();
     }
-    bool test=QSqlQueryModel::setData(index,value,Qt::EditRole);
-    emit SavesChanged(stack.size());*/
+    this->setData(index(i,this->columnCount()-1),QVariant(summ));
 }
-void MySqlQueryColorModel::stackWrite(){
-   /* if(stack.empty()){
-        return;
+void MySqlQueryColorModel::calc(QStandardItem *item){
+    calc(item->row());
+}
+void MySqlQueryColorModel::recalc(){
+    for(int i=0;i<this->rowCount()-1;i++)
+        calc(i);
+}
+void MySqlQueryColorModel::setLoad(bool l){
+    loaded=l;
+    if(isSumm&&loaded){
+        connect(this,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(calc(QStandardItem*)));
     }else{
-        emit startSave(stack.size());
-        int i=0;
-        while(!stack.isEmpty()){
-            db->Query_no_update(stack.front().qyer);
-            if(stack.front().index<0)
-                db->sumCount(stack.front().Group);
-            else
-                db->sumCount(stack.front().Group,stack.front().predmet,stack.front().index);
-            stack.pop_front();
-            i++;
-            emit tableSaveProgress(i);
-        }
-        emit tableSaveProgress(i);
-        emit SavesChanged(stack.size());
-    }*/
+        disconnect(this,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(calc(QStandardItem*)));
+    }
 }
-void MySqlQueryColorModel::save(){
-    //stackWrite();
+void MySqlQueryColorModel::setSummColumn(bool summ){
+    if(summ&&loaded){
+        connect(this,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(calc(QStandardItem*)));
+    }else{
+        disconnect(this,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(calc(QStandardItem*)));
+    }
+    isSumm=summ;
+}
+filter MySqlQueryColorModel::checkLimit(const QModelIndex &index)const{
+    float temp=limit/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
+    if(temp<0){
+        return filter::normal;//good
+    }else{
+        if(temp<1.0){
+            return filter::critical;//bad
+
+        }else{
+            if(temp<2.0){
+                return filter::warning;//warning
+
+            }else{
+                return filter::normal;//good
+            }
+        }
+    }
+}
+void MySqlQueryColorModel::setFilter(const char filter){
+    filter_=filter;
 }
 void MySqlQueryColorModel::setLimit(const int row){
         limit=row;
 }
 QVariant MySqlQueryColorModel::data(const QModelIndex &index, int role) const{
-    if(Qt::BackgroundRole==role){
-        float temp=limit/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
-        if(temp<0){
+    if(role==Qt::BackgroundRole){
+        switch (checkLimit(index)) {
+        case filter::normal:
+            return QBrush(QColor(240,255,240));//good       #f0fff0
+            break;
+        case filter::warning:
+            return QBrush(QColor(255,228,181));//warning    #ffE4B5
+            break;
+        case filter::critical:
+            return QBrush(QColor(255,130,71));//bad         #ff8247
+            break;
+        default:
             return QBrush(QColor(240,255,240));//good
-        }else{
-            if(temp<1.0){
-                return QBrush(QColor(255,130,71));//bad
-
-            }else{
-                if(temp<2.0){
-                    return QBrush(QColor(255,228,181));//warning
-
-                }else{
-                    return QBrush(QColor(240,255,240));//good
-                }
-            }
+            break;
         }
     }
     return QStandardItemModel::data(index,role);
@@ -86,74 +110,70 @@ void MySqlQueryColorModelU::clear(){
     limit[2]=-1;
     limit[3]=-1;
 }
-QVariant MySqlQueryColorModelU::data(const QModelIndex &index, int role) const{
-    if(Qt::BackgroundRole==role){
-        if(!isAll){
-            switch (index.column()) {
-            case 0:return QBrush(QColor(240,255,240));
-            case 1:
-                if(index.data().toInt()<limit[PC_]){
-                    return QBrush(QColor(255,130,71));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-            case 2:
-                if(index.data().toInt()<limit[LC_]){
-                    return QBrush(QColor(255,130,71));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-            case 3:
-            case 4:
-                if(index.data().toInt()<limit[index.column()-1]){
-                    return QBrush(QColor(255,130,71));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-            case 5:
-                if(index.data().toInt()<limit[LC_]){
-                    return QBrush(QColor(255,228,181));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-                break;
-            case 6:
-
-                if(index.data().toInt()<limit[KRC_]){
-                    return QBrush(QColor(255,228,181));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-                break;
-            case 7:
-
-                if(index.data().toInt()<limit[RGRC_]){
-                    return QBrush(QColor(255,228,181));
-                }else{
-                    return QBrush(QColor(240,255,240));
-                }
-                break;
-            default:
-                break;
-            }
-        }else{
-            float temp=limit[last]/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
-            if(temp<0){
-                return QBrush(QColor(240,255,240));//good
+filter MySqlQueryColorModelU::checkLimit(const QModelIndex &index)const{
+    if(!isAll){
+        switch (index.column()) {
+        case 0:
+            if(index.data().toInt()<limit[PC_]){
+                return filter::critical;
             }else{
-                if(temp<1.0){
-                    return QBrush(QColor(240,255,240));//good
+                return filter::normal;
+            }
+        case 1:
+            if(index.data().toInt()<limit[LC_]){
+                return filter::critical;
+            }else{
+                return filter::normal;
+            }
+        case 2:
+        case 3:
+            if(index.data().toInt()<limit[index.column()-1]){
+                return filter::critical;
+            }else{
+                return filter::normal;
+            }
+        case 4:
+            if(index.data().toInt()<limit[LC_]){
+                return filter::warning;
+            }else{
+                return filter::normal;
+            }
+            break;
+        case 5:
+
+            if(index.data().toInt()<limit[KRC_]){
+                return filter::warning;
+            }else{
+                return filter::normal;
+            }
+            break;
+        case 6:
+
+            if(index.data().toInt()<limit[RGRC_]){
+                return filter::warning;
+            }else{
+                return filter::normal;
+            }
+            break;
+        default:
+            return filter::normal;
+        }
+    }else{
+        float temp=limit[last]/(QStandardItemModel::data(QStandardItemModel::index(index.row(),columnCount()-1)).toFloat()+1);
+        if(temp<0){
+            return filter::normal;
+        }else{
+            if(temp<1.0){
+                return filter::normal;
+            }else{
+                if(temp<2.0){
+                    return filter::warning;
                 }else{
-                    if(temp<2.0){
-                        return QBrush(QColor(255,228,181));//warning
-                    }else{
-                        return QBrush(QColor(255,130,71));//bad
-                    }
+                    return filter::critical;
                 }
             }
         }
     }
-    return QStandardItemModel::data(index,role);
 }
 MySqlQueryColorModelU::~MySqlQueryColorModelU(){
 }

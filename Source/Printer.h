@@ -6,6 +6,7 @@
 #include <QTableView>
 #include <QTextDocument>
 #include <QPrinter>
+#include "MySqlQueryColorModel.h"
 #include <QTextStream>
 class Printer
 {
@@ -18,6 +19,7 @@ public:
     static QString getHTML(QTableView *table, const QString &style="");
     static bool printPDF(QTableView *table, QString patch="./page.pdf");
     static bool printPDF(const QString &code, QString patch="./page.pdf");
+    static QString test(QTableView *tab, int i);
 
     virtual ~Printer();
 };

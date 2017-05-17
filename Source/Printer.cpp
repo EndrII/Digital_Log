@@ -20,6 +20,15 @@ bool Printer::print(const QString &code, QString patch,const QString&type ){
         }else
             return false;
 }
+QString Printer::test(QTableView *tab,int i){
+    switch (static_cast<MySqlQueryColorModel*>(tab->model())->checkLimit(tab->model()->index(i,0))
+) {
+    case filter::normal:return "#f0fff0";
+    case filter::warning:return "#ffE4B5";
+    case filter::critical:return "#ff8247";
+    default: return "#f0fff0";
+    }
+}
 QString Printer::getHTML(QTableView *table,const QString&style ){
     QString stream("<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>");
     if(style.isEmpty()){
@@ -35,13 +44,13 @@ QString Printer::getHTML(QTableView *table,const QString&style ){
     }else{
         stream+=style;
     }
-    stream+="<table id=PrintPage><tr><th></th>";
+    stream+="<table id=PrintPage><tr><th>ФИО</th>";
     for(int i=0;i<table->model()->columnCount();i++){
         stream+="<th>"+table->model()->headerData(i,Qt::Horizontal).toString()+"</th>";
     }
     stream+="</tr>";
     for(int i=0;i<table->model()->rowCount();i++){
-        stream+="<tr><td>"+QString::number(i+1)+")</td>";
+        stream+="<tr backgrouning-color="+test(table,i)+"><td>"+table->model()->headerData(i,Qt::Vertical).toString()+":</td>";
         for(int j=0;j<table->model()->columnCount();j++){
              stream+="<td>"+table->model()->data(table->model()->index(i,j)).toString()+"</td>";
             }
