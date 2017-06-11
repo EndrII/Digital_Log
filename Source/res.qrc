@@ -5,4 +5,12 @@
         <file>language/RUS</file>
         <file>ccs/StyleProgramm.css</file>
     </qresource>
+    <qresource prefix="/h">
+        <file>help/admin.html</file>
+        <file>help/databases.html</file>
+        <file>help/groups.html</file>
+        <file>help/index.html</file>
+        <file>help/main.html</file>
+        <file>help/settings.html</file>
+    </qresource>
 </RCC>

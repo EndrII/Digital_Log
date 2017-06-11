@@ -73,6 +73,9 @@ void MainWindow::createMenu(){
     control->addAction(DateManager);
     connect(DateManager,SIGNAL(triggered(bool)),this,SLOT(dateManager_(bool)));
 
+    QAction *Action=new QAction("Help",this);
+    this->menuBar()->addAction(Action);
+    connect(Action,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
     /*stop=new QAction(ELanguage::getWord(STOP),this);
     control->addAction(stop);
     connect(stop,SIGNAL(triggered(bool)),this,SLOT(stop_(bool)));*/
@@ -98,6 +101,7 @@ void MainWindow::stateChanged(bool stat){
 void MainWindow::about(bool){
 }
 void MainWindow::help(bool){
+    (new Help(this))->show();
 }
 void MainWindow::BASES(bool){
     (new DataBasesMenager(bd,this))->show();

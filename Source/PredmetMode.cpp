@@ -234,6 +234,8 @@ void PredmetMode::Enter(QModelIndex mod,QModelIndex,QVector<int>){
         temp.date=times->currentText();
         temp.work_group=model->headerData(mod.column(),Qt::Horizontal).toString();
     }
+    qDebug()<<"WriteLine="<<bd->writeLine(temp);
+
 }
 void PredmetMode::sortTableU(){
     table->sortByColumn(table->selectionModel()->currentIndex().column(),Qt::AscendingOrder);

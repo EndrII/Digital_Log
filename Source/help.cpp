@@ -15,7 +15,7 @@ Help::Help(QWidget *ptr):QDialog(ptr){
 
         this->setModal(true);
         aboutLogo=new QTextBrowser();
-        QFile f(":/help/index.html");
+        QFile f(":/h/help/index.html");
         if(f.open(QIODevice::ReadOnly)){
             QString temp;
             QTextStream stream(&f);
@@ -32,7 +32,7 @@ Help::Help(QWidget *ptr):QDialog(ptr){
         connect(aboutLogo,SIGNAL(anchorClicked(QUrl)),this,SLOT(anchers(QUrl)));
 }
 void Help::anchers(QUrl u){
-    QString temp=":/help/"+u.url();
+    QString temp=":/h/help/"+u.url();
     QFile f(temp);
     if(f.open(QIODevice::ReadOnly)){
         QTextStream stream(&f);
