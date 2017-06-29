@@ -1,0 +1,5 @@
+*.tar.gz
+
+*.exe
+builds/*
+Digital_Log.pro.*

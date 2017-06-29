@@ -30,6 +30,15 @@ struct Write_Line_Params{
     QString valueColumn;// Horizontal header of model table
     QString value;// value of model table
 };
+struct User{
+    User(const QString name="",const QString pass=""){
+        this->name=name;
+        this->pass=pass;
+    }
+    QString name;
+    QString pass;
+};
+typedef QList<User> Users;
 struct Write_Line_ParamsU{
     QString student;
     QString subject;
@@ -55,6 +64,12 @@ protected:
    //  */
    // void stateChang();
     /**
+     * @brief createDefaultUsers create new default users for database
+     * @param databaseName name of database
+     * @return true if users created else false.
+     */
+    bool createDefaultUsers(const  QString& databaseName);
+    /**
      * @brief error_msg
      * выброс сообщения об ошибке
      */
@@ -71,6 +86,13 @@ public:
      * @brief sqlDataBase констуктор базы данных
      */
     explicit sqlDataBase();
+    bool setUserPass(const User&);
+    /**
+     * @brief getUserInformation get information about users of curent database;
+     * @param databaseName
+     * @return
+     */
+    bool getUserInformation(Users &users);
     /**
      * @brief transformQuery transformation a date of the query to standartItemModel
      * @param query query of table

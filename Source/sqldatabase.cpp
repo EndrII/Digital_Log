@@ -49,6 +49,38 @@ void sqlDataBase::error_msg(const QString& Messag){
         emit Message(0,Messag);
     }
 }
+/*
+ * CREATE USER 'Admin'@'%' IDENTIFIED BY 'ipf';
+ * GRANT ALL PRIVILEGES ON [имя базы данных].* TO 'Admin'@'%';
+
+CREATE USER 'Headman'@'%';
+GRANT SELECT ON [имя базы данных].* TO 'Headman'@'%';
+GRANT INSERT,UPDATE ON [имя базы данных].attendance TO 'Headman'@'%';
+
+
+CREATE USER 'Teacher'@'%';
+GRANT SELECT ON [имя базы данных].* TO 'Teacher'@'%';
+GRANT INSERT,UPDATE ON [имя базы данных].attendance TO 'Teacher'@'%';
+GRANT INSERT,UPDATE ON [имя базы данных].performance TO 'Teacher'@'%';
+GRANT INSERT,UPDATE ON [имя базы данных].limits TO 'Teacher'@'%';
+
+CREATE USER 'Student'@'%';
+GRANT SELECT ON [имя базы данных].* TO 'Student'@'%';
+*/
+bool sqlDataBase::createDefaultUsers(const QString &databaseName){
+    QString sqlExec=QString("CREATE USER 'Admin%0'@'%' IDENTIFIED BY 'ipf';"
+                    "GRANT ALL PRIVILEGES ON %0.* TO 'Admin%0'@'%';"
+                    "CREATE USER 'Headman%0'@'%';"
+                    "GRANT SELECT ON %0.* TO 'Headman%0'@'%';"
+                    "CREATE USER 'Teacher%0'@'%';"
+                    "GRANT SELECT ON %0.* TO 'Teacher%0'@'%';"
+                    "GRANT INSERT,UPDATE ON %0.attendance TO 'Teacher%0'@'%';"
+                    "GRANT INSERT,UPDATE ON %0.performance TO 'Teacher%0'@'%';"
+                    "GRANT INSERT,UPDATE ON %0.limits TO 'Teacher%0'@'%';"
+                    "CREATE USER 'Student%0'@'%';"
+                    "GRANT SELECT ON %0.* TO 'Student%0'@'%';").arg(databaseName);
+    return qer->exec(sqlExec);
+}
 bool sqlDataBase::SqlExec(QSqlQuery *sq, const QString &sqlFile){
     QFile f(sqlFile);
     bool result=true;
@@ -331,6 +363,11 @@ bool sqlDataBase:: writeLine(const Write_Line_ParamsU& description){
         return qer->exec(q);
     }
     return false;
+}
+bool sqlDataBase::getUserInformation(Users &users){
+   // SELECT User,Host FROM mysql.user;
+    QString exec=QString("SELECT User,Host FROM mysql.user");
+    qer->exec()
 }
 bool sqlDataBase::transformQuery(const QString& query, const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
     if(qer->exec(query)){
