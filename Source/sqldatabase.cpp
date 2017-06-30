@@ -365,9 +365,13 @@ bool sqlDataBase:: writeLine(const Write_Line_ParamsU& description){
     return false;
 }
 bool sqlDataBase::getUserInformation(Users &users){
-   // SELECT User,Host FROM mysql.user;
-    QString exec=QString("SELECT User,Host FROM mysql.user");
-    qer->exec()
+    if(qer->exec("SELECT User,Host FROM mysql.user")){
+        while(qer->next()){
+
+        }
+        return true;
+    }
+    return false;
 }
 bool sqlDataBase::transformQuery(const QString& query, const QString &columnData, const QString &rowData, const QString &valueData, QStandardItemModel * model){
     if(qer->exec(query)){
