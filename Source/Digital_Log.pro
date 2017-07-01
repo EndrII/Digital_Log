@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     DateMaster.cpp \
     PrinterDialog.cpp \
     MySqlQueryColorModel.cpp \
-    SpaceEngineComponents/System/css.cpp
+    SpaceEngineComponents/System/css.cpp \
+    userdialog.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -75,7 +76,8 @@ HEADERS  += mainwindow.h \
     DateMaster.h \
     PrinterDialog.h \
     MySqlQueryColorModel.h \
-    SpaceEngineComponents/System/css.h
+    SpaceEngineComponents/System/css.h \
+    userdialog.h
 
 RESOURCES += \
     res.qrc \
@@ -86,3 +88,6 @@ DISTFILES += \
     sql/запросы.sql \
     sql/списки.sql \
     ccs/StyleProgramm.css
+
+FORMS += \
+    userdialog.ui

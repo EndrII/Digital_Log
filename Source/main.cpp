@@ -11,12 +11,12 @@
 ****************************************************************************/
 #include "mainwindow.h"
 #include <QApplication>
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     ELanguage::setLanguage(":/language/RUS");
     QLocale::setDefault(QLocale::system());
+
    // QApplication::setLibraryPaths(QStringList()<<"/media/D/Builds/build-Digital_Log-Desktop_Qt_5_7_0_GCC_64bit2-Release/plugins/");
     MainWindow w;
     w.show();

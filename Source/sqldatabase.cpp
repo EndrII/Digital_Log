@@ -367,7 +367,9 @@ bool sqlDataBase:: writeLine(const Write_Line_ParamsU& description){
 bool sqlDataBase::getUserInformation(Users &users){
     if(qer->exec("SELECT User,Host FROM mysql.user")){
         while(qer->next()){
-
+            QString user(qer->value("User").toString());
+            if(user.indexOf(this->databaseName())>-1)
+                users.push_back(User(user,qer->value("authentication_string").toString()));
         }
         return true;
     }
