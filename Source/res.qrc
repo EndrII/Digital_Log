@@ -12,5 +12,6 @@
         <file>help/index.html</file>
         <file>help/main.html</file>
         <file>help/settings.html</file>
+        <file>help/About.html</file>
     </qresource>
 </RCC>

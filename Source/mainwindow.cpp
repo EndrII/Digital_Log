@@ -12,6 +12,7 @@
 
 #include "mainwindow.h"
 #include "userdialog.h"
+#include "about.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -83,6 +84,10 @@ void MainWindow::createMenu(){
     QAction *Action=new QAction("Help",this);
     this->menuBar()->addAction(Action);
     connect(Action,SIGNAL(triggered(bool)),this,SLOT(help(bool)));
+
+    Action=new QAction("About",this);
+    this->menuBar()->addAction(Action);
+    connect(Action,SIGNAL(triggered(bool)),this,SLOT(about(bool)));
     /*stop=new QAction(ELanguage::getWord(STOP),this);
     control->addAction(stop);
     connect(stop,SIGNAL(triggered(bool)),this,SLOT(stop_(bool)));*/
@@ -106,6 +111,7 @@ void MainWindow::stateChanged(bool stat){
 /*void MainWindow::AchiveOk(QString ){
 }*/
 void MainWindow::about(bool){
+    (new About(this))->show();
 }
 void MainWindow::users_(bool){
     (new UserDialog(bd,this))->show();

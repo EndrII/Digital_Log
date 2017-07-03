@@ -16,7 +16,7 @@ About::About(QWidget *ptr):QDialog(ptr)
     this->setModal(true);
     aboutLogo=new QLabel();
 
-    QFile f(":/help/About.html");
+    QFile f(":/h/help/About.html");
     if(f.open(QIODevice::ReadOnly)){
         QString temp;
         QTextStream stream(&f);
