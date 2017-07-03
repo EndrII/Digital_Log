@@ -169,3 +169,5 @@ FOREIGN KEY(_group) REFERENCES groups(id)
         ON DELETE CASCADE
 )ENGINE=InnoDB CHARACTER SET=UTF8;
 
+SET GLOBAL event_scheduler=ON;
+

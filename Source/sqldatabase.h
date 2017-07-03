@@ -30,6 +30,12 @@ struct Write_Line_Params{
     QString valueColumn;// Horizontal header of model table
     QString value;// value of model table
 };
+enum class ut{
+    Student=0,
+    Headman=1,
+    Teacher=2,
+    Admin=3
+};
 struct User{
     User(const QString name="",const QString pass=""){
         this->name=name;
@@ -38,7 +44,7 @@ struct User{
     QString name;
     QString pass;
 };
-typedef QList<User> Users;
+typedef QVector<User> Users;
 struct Write_Line_ParamsU{
     QString student;
     QString subject;
@@ -55,6 +61,7 @@ class sqlDataBase:public QObject, protected QSqlDatabase{
 private:
     QStringList tempList;
     QSqlQuery *qer;
+    QString databaseName;
     bool state;
     QSqlQueryModel *model;
 private slots:
@@ -69,6 +76,12 @@ protected:
      * @return true if users created else false.
      */
     bool createDefaultUsers(const  QString& databaseName);
+    /**
+     * @brief removeDefaultUsers create new default users for database
+     * @param databaseName name of database
+     * @return true if users removed else false.
+     */
+    bool removeDefaultUsers(const  QString& databaseName);
     /**
      * @brief error_msg
      * выброс сообщения об ошибке
@@ -86,7 +99,17 @@ public:
      * @brief sqlDataBase констуктор базы данных
      */
     explicit sqlDataBase();
+    /**
+     * @brief setUserPass set a new pass by User
+     * @return true if all done else false;
+     */
     bool setUserPass(const User&);
+    /**
+     * @brief removeDatabase remove a database;
+     * @param databaseName
+     * @return true if all done else false;
+     */
+    bool removeDatabase(const QString& databaseName);
     /**
      * @brief getUserInformation get information about users of curent database;
      * @param databaseName

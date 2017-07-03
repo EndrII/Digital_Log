@@ -68,18 +68,40 @@ CREATE USER 'Student'@'%';
 GRANT SELECT ON [имя базы данных].* TO 'Student'@'%';
 */
 bool sqlDataBase::createDefaultUsers(const QString &databaseName){
-    QString sqlExec=QString("CREATE USER 'Admin%0'@'%' IDENTIFIED BY 'ipf';"
-                    "GRANT ALL PRIVILEGES ON %0.* TO 'Admin%0'@'%';"
-                    "CREATE USER 'Headman%0'@'%';"
-                    "GRANT SELECT ON %0.* TO 'Headman%0'@'%';"
-                    "CREATE USER 'Teacher%0'@'%';"
-                    "GRANT SELECT ON %0.* TO 'Teacher%0'@'%';"
-                    "GRANT INSERT,UPDATE ON %0.attendance TO 'Teacher%0'@'%';"
-                    "GRANT INSERT,UPDATE ON %0.performance TO 'Teacher%0'@'%';"
-                    "GRANT INSERT,UPDATE ON %0.limits TO 'Teacher%0'@'%';"
-                    "CREATE USER 'Student%0'@'%';"
-                    "GRANT SELECT ON %0.* TO 'Student%0'@'%';").arg(databaseName);
-    return qer->exec(sqlExec);
+    QStringList sqlExec;
+    sqlExec<<QString("CREATE USER 'Admin_%0'@'%' IDENTIFIED BY 'ipf';").arg(databaseName);
+    sqlExec<<QString("GRANT ALL PRIVILEGES ON %0.* TO 'Admin_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("CREATE USER 'Headman_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT SELECT ON %0.* TO 'Headman_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT INSERT,UPDATE ON %0.attendance TO 'Headman_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("CREATE USER 'Teacher_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT SELECT ON %0.* TO 'Teacher_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT INSERT,UPDATE ON %0.attendance TO 'Teacher_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT INSERT,UPDATE ON %0.performance TO 'Teacher_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT INSERT,UPDATE ON %0.limits TO 'Teacher_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("CREATE USER 'Student_%0'@'%';").arg(databaseName);
+    sqlExec<<QString("GRANT SELECT ON %0.* TO 'Student_%0'@'%';").arg(databaseName);
+    bool result=true;
+    for(QString str:sqlExec){
+        result=result&&qer->exec(str);
+        if(!result){
+            qDebug()<<str<<"\n with error: "<<qer->lastError().databaseText();
+        }
+    }
+    return result;
+}
+bool sqlDataBase::removeDefaultUsers(const QString &databaseName){
+    QSqlQuery q(*this);
+    bool result=true;
+    if(qer->exec("SELECT User,Host FROM mysql.user")){
+        while(qer->next()){
+            QString user(qer->value("User").toString());
+            if(user.indexOf("_"+databaseName)>-1){
+                result=result&&q.exec(QString("DROP User '%0'@'%'").arg(user));
+            }
+        }
+    }
+    return result;
 }
 bool sqlDataBase::SqlExec(QSqlQuery *sq, const QString &sqlFile){
     QFile f(sqlFile);
@@ -188,6 +210,7 @@ void sqlDataBase::openDB(const QString &BaseName){
     }else{
         emit Message(1,ELanguage::getWord(SELECTED_DB)+" "+BaseName);
         emit ChangedBD();
+        databaseName=BaseName;
         if(state!=isOpen()){
             emit stateChanged(state=isOpen());
         }
@@ -196,7 +219,7 @@ void sqlDataBase::openDB(const QString &BaseName){
 bool sqlDataBase::createDB(const QString &BaseName){
     if(qer->exec("create database "+BaseName)&&
        qer->exec("use "+BaseName)){
-       return SqlExec(qer,":/sql/sql/Create.sql");
+       return SqlExec(qer,":/sql/sql/Create.sql")&&createDefaultUsers(BaseName);
     }
     return false;
 }
@@ -364,12 +387,38 @@ bool sqlDataBase:: writeLine(const Write_Line_ParamsU& description){
     }
     return false;
 }
+bool sqlDataBase::setUserPass(const User & user){
+    QString qery=QString("SET PASSWORD FOR '%0'@'%' = PASSWORD('%1')").arg(user.name,user.pass);
+    return qer->exec(qery);
+}
+bool sqlDataBase::removeDatabase(const QString &databaseName){
+    if(removeDefaultUsers(databaseName)){
+        return qer->exec("drop database "+databaseName);
+    }
+    return false;
+}
 bool sqlDataBase::getUserInformation(Users &users){
-    if(qer->exec("SELECT User,Host FROM mysql.user")){
+    if(qer->exec("SELECT User,Host,authentication_string FROM mysql.user")){
         while(qer->next()){
             QString user(qer->value("User").toString());
-            if(user.indexOf(this->databaseName())>-1)
-                users.push_back(User(user,qer->value("authentication_string").toString()));
+            if(user.indexOf("_"+databaseName)>-1){
+                if(user.indexOf("Student")>-1){
+                    users[(int)ut::Student].name=user;
+                    users[(int)ut::Student].pass=qer->value("authentication_string").toString();
+                }
+                if(user.indexOf("Teacher")>-1){
+                    users[(int)ut::Teacher].name=user;
+                    users[(int)ut::Teacher].pass=qer->value("authentication_string").toString();
+                }
+                if(user.indexOf("Headman")>-1){
+                    users[(int)ut::Headman].name=user;
+                    users[(int)ut::Headman].pass=qer->value("authentication_string").toString();
+                }
+                if(user.indexOf("Admin")>-1){
+                    users[(int)ut::Admin].name=user;
+                    users[(int)ut::Admin].pass=qer->value("authentication_string").toString();
+                }
+            }
         }
         return true;
     }

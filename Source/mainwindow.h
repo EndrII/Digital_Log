@@ -46,13 +46,14 @@ private:
     QLabel *state;
     QTextEdit *LogPanel;
     QMenu *control,*file;
-    QAction *mset,*bases,*grs,*connect_m,*closeA,*DateManager,*stop,*toArhive;
+    QAction *users,*mset,*bases,*grs,*connect_m,*closeA,*DateManager,*stop,*toArhive;
     void createMenu();
 private slots:
     void Error(int,QString);
     void stateChanged(bool);
     void about(bool);
     void help(bool);
+    void users_(bool);
     void setings(bool);
     void dateManager_(bool);
    // void stop_(bool);

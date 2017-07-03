@@ -11,7 +11,7 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
-
+#include "userdialog.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -67,11 +67,18 @@ void MainWindow::createMenu(){
     file->addAction(mset);
     connect(mset,SIGNAL(triggered(bool)),this,SLOT(setings(bool)));
 
+
+
     control=new QMenu(ELanguage::getWord(STATUS_CONTROL),this);
     this->menuBar()->addMenu(control);
+
     DateManager=new QAction(ELanguage::getWord(DATE_MENAGER),this);
     control->addAction(DateManager);
     connect(DateManager,SIGNAL(triggered(bool)),this,SLOT(dateManager_(bool)));
+
+    users=new QAction(tr("Управление пользователями"),this);
+    control->addAction(users);
+    connect(users,SIGNAL(triggered(bool)),this,SLOT(users_(bool)));
 
     QAction *Action=new QAction("Help",this);
     this->menuBar()->addAction(Action);
@@ -99,6 +106,9 @@ void MainWindow::stateChanged(bool stat){
 /*void MainWindow::AchiveOk(QString ){
 }*/
 void MainWindow::about(bool){
+}
+void MainWindow::users_(bool){
+    (new UserDialog(bd,this))->show();
 }
 void MainWindow::help(bool){
     (new Help(this))->show();

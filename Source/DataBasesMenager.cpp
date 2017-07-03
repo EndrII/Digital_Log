@@ -63,7 +63,7 @@ void DataBasesMenager::deleteClick(bool){
                               ELanguage::getWord(YES), ELanguage::getWord(NO))){
         white(false);
         for(QModelIndex index :ListdataBases->selectionModel()->selectedRows()){
-            bd->Query("drop database "+ListdataBases->model()->data(index).toString());
+            bd->removeDatabase(ListdataBases->model()->data(index).toString());
             model->removeRow(index.row());
         }
         white(true);
